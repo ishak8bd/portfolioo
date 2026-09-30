@@ -1,12 +1,14 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { motion, useAnimationFrame, useMotionValue, useTransform, useInView } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Pause, Play, MoveHorizontal, RotateCcw } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Pause, Play, MoveHorizontal, RotateCcw, Layers } from 'lucide-react';
 import type { Project } from '../types/project';
 import { ProjectCard } from './ProjectCard';
 
 interface MarqueeShowcaseProps {
   projects: Project[];
   onSelectProject: (project: Project) => void;
+  viewMode?: 'ring' | 'marquee';
+  onToggleViewMode?: (mode: 'ring' | 'marquee') => void;
 }
 
 type EntrancePhase = 'idle' | 'spinning' | 'expanding' | 'looping';
@@ -21,6 +23,8 @@ function wrapRange(min: number, max: number, v: number): number {
 export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
   projects,
   onSelectProject,
+  viewMode = 'marquee',
+  onToggleViewMode,
 }) => {
   const sectionRef = useRef<HTMLElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -30,7 +34,7 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
 
   // In-view detection to trigger entrance
   const isInView = useInView(sectionRef, { once: true, margin: '-60px 0px' });
-  const [phase, setPhase] = useState<EntrancePhase>('idle');
+  const [phase, setPhase] = useState<EntrancePhase>('looping');
   const [entranceKey, setEntranceKey] = useState(0);
   const hasTriggeredEntrance = useRef(false);
   const phaseTimersRef = useRef<number[]>([]);
@@ -372,7 +376,35 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
         </div>
 
         {/* Status & Control Indicators */}
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          {/* View Mode Toggle: 3D Ring vs Marquee */}
+          {onToggleViewMode && (
+            <div className="flex items-center p-1 rounded-full bg-white/[0.04] border border-white/10 text-xs font-mono">
+              <button
+                onClick={() => onToggleViewMode('ring')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all cursor-pointer ${
+                  viewMode === 'ring'
+                    ? 'bg-sky-500 text-black font-semibold shadow-lg shadow-sky-500/25'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                <Layers className="w-3.5 h-3.5" />
+                <span>3D Ring</span>
+              </button>
+              <button
+                onClick={() => onToggleViewMode('marquee')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all cursor-pointer ${
+                  viewMode === 'marquee'
+                    ? 'bg-sky-500 text-black font-semibold shadow-lg shadow-sky-500/25'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                <MoveHorizontal className="w-3.5 h-3.5" />
+                <span>Marquee</span>
+              </button>
+            </div>
+          )}
+
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/10 text-xs font-mono text-zinc-400">
             {phase !== 'looping' ? (
               <>
