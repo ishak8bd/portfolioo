@@ -6,6 +6,7 @@ import {
   Layers,
   MoveHorizontal,
   RotateCcw,
+  RotateCw,
   Sparkles,
 } from 'lucide-react';
 import type { Project } from '../types/project';
@@ -63,7 +64,7 @@ export const RingShowcase: React.FC<RingShowcaseProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [autoRotate, setAutoRotate] = useState(true); // Always moving by default like marquee
   const [isCardHovered, setIsCardHovered] = useState(false);
-  const [tappedCardIndex, setTappedCardIndex] = useState<number | null>(null);
+  const [flippedCardIndex, setFlippedCardIndex] = useState<number | null>(null);
 
   // Drag tracking refs
   const isPointerDownRef = useRef(false);
@@ -99,10 +100,10 @@ export const RingShowcase: React.FC<RingShowcaseProps> = ({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight') {
-        setTappedCardIndex(null);
+        setFlippedCardIndex(null);
         nextCard();
       } else if (e.key === 'ArrowLeft') {
-        setTappedCardIndex(null);
+        setFlippedCardIndex(null);
         prevCard();
       }
     };
@@ -112,7 +113,7 @@ export const RingShowcase: React.FC<RingShowcaseProps> = ({
 
   // Continuous Auto-rotation loop (Always moving continuously like the marquee)
   useEffect(() => {
-    if (!autoRotate || isDragging || isCardHovered || tappedCardIndex !== null) {
+    if (!autoRotate || isDragging || isCardHovered || flippedCardIndex !== null) {
       if (autoRotateTimerRef.current) cancelAnimationFrame(autoRotateTimerRef.current);
       return;
     }
@@ -130,14 +131,14 @@ export const RingShowcase: React.FC<RingShowcaseProps> = ({
     return () => {
       if (autoRotateTimerRef.current) cancelAnimationFrame(autoRotateTimerRef.current);
     };
-  }, [autoRotate, isDragging, isCardHovered, tappedCardIndex]);
+  }, [autoRotate, isDragging, isCardHovered, flippedCardIndex]);
 
   // Pointer drag event handlers
   const handlePointerDown = (e: React.PointerEvent) => {
     if (e.button !== 0) return;
     isPointerDownRef.current = true;
     setIsDragging(true);
-    setTappedCardIndex(null); // Clear tapped card when dragging
+    setFlippedCardIndex(null); // Clear flipped card when dragging
     startXRef.current = e.clientX;
     lastXRef.current = e.clientX;
     startAngleRef.current = angle;
@@ -177,23 +178,19 @@ export const RingShowcase: React.FC<RingShowcaseProps> = ({
   const activeProject = projects[activeNormalizedIndex];
 
   // Card click/tap handler:
-  // - First tap on a card reveals the "View Case Study" button and pauses auto-spin.
-  // - Second tap on the card (or tapping the button itself) opens the case study modal.
-  // - Tapping a card in the back rotates it to front, then reveals the button.
-  const handleCardClick = (index: number, project: Project) => {
+  // - First tap on the front card flips it in 3D to reveal description and technologies.
+  // - Second tap on the card (or clicking Flip Back) flips it back to front.
+  const handleCardClick = (index: number) => {
     if (totalDragRef.current > 8) return; // Ignore drag release
 
     if (index === activeNormalizedIndex) {
-      if (tappedCardIndex === index) {
-        onSelectProject(project);
-      } else {
-        setTappedCardIndex(index);
-      }
+      setFlippedCardIndex((prev) => (prev === index ? null : index));
     } else {
       goTo(index);
+      setFlippedCardIndex(null);
       setTimeout(() => {
-        setTappedCardIndex(index);
-      }, 450);
+        setFlippedCardIndex(index);
+      }, 550);
     }
   };
 
@@ -235,7 +232,7 @@ export const RingShowcase: React.FC<RingShowcaseProps> = ({
             <div className="flex items-center p-1 rounded-full bg-white/[0.04] border border-white/10 text-xs font-mono">
               <button
                 onClick={() => {
-                  setTappedCardIndex(null);
+                  setFlippedCardIndex(null);
                   onToggleViewMode('ring');
                 }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all cursor-pointer ${
@@ -249,7 +246,7 @@ export const RingShowcase: React.FC<RingShowcaseProps> = ({
               </button>
               <button
                 onClick={() => {
-                  setTappedCardIndex(null);
+                  setFlippedCardIndex(null);
                   onToggleViewMode('marquee');
                 }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all cursor-pointer ${
@@ -264,17 +261,17 @@ export const RingShowcase: React.FC<RingShowcaseProps> = ({
             </div>
           )}
 
-          {/* Status Indicator (Continuous Spin / Card Selected / Paused / Rotating) */}
+          {/* Status Indicator (Continuous Spin / Card Flipped / Paused / Rotating) */}
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/10 text-xs font-mono text-zinc-400">
             {isDragging ? (
               <>
                 <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping" />
                 <span className="text-sky-300">Rotating</span>
               </>
-            ) : tappedCardIndex !== null ? (
+            ) : flippedCardIndex !== null ? (
               <>
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                <span className="text-amber-300">Card Selected</span>
+                <span className="text-amber-300">Card Flipped</span>
               </>
             ) : isCardHovered ? (
               <>
@@ -321,7 +318,7 @@ export const RingShowcase: React.FC<RingShowcaseProps> = ({
           <button
             onClick={() => {
               setAngle(0);
-              setTappedCardIndex(null);
+              setFlippedCardIndex(null);
             }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 text-xs font-mono text-zinc-400 hover:text-white transition-all cursor-pointer"
             title="Reset to Project 01"
@@ -335,7 +332,7 @@ export const RingShowcase: React.FC<RingShowcaseProps> = ({
       {/* 3D Ring View Stage */}
       <div
         ref={containerRef}
-        onClick={() => setTappedCardIndex(null)}
+        onClick={() => setFlippedCardIndex(null)}
         className="relative w-full h-[540px] sm:h-[600px] md:h-[650px] flex items-center justify-center cursor-grab active:cursor-grabbing"
         style={{
           perspective: '1400px',
@@ -369,13 +366,14 @@ export const RingShowcase: React.FC<RingShowcaseProps> = ({
           {projects.map((project, i) => {
             const cardTheta = i * step;
             const isFront = i === activeNormalizedIndex;
+            const isFlipped = flippedCardIndex === i;
 
             return (
               <div
                 key={project.id}
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleCardClick(i, project);
+                  handleCardClick(i);
                 }}
                 onMouseEnter={() => setIsCardHovered(true)}
                 onMouseLeave={() => setIsCardHovered(false)}
@@ -389,186 +387,218 @@ export const RingShowcase: React.FC<RingShowcaseProps> = ({
                   transformStyle: 'preserve-3d',
                 }}
               >
-                {/* 1. FRONT FACE (Facing Outward: visible when in front arc) */}
+                {/* 3D Flipping Card Container */}
                 <div
-                  className={`absolute inset-0 rounded-2xl overflow-hidden transition-all duration-500 ${
-                    isFront
-                      ? 'ring-2 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]'
-                      : 'opacity-85 hover:opacity-100 shadow-[0_15px_35px_-10px_rgba(0,0,0,0.8)]'
-                  }`}
+                  className="relative w-full h-full rounded-2xl transition-transform duration-700 ease-out"
                   style={{
-                    backfaceVisibility: 'hidden',
-                    WebkitBackfaceVisibility: 'hidden',
-                    WebkitBoxReflect:
-                      'below 8px linear-gradient(transparent 65%, rgba(255, 255, 255, 0.22))',
-                    backgroundColor: '#0c0e14',
-                    borderColor: isFront ? project.accentColor : 'rgba(255, 255, 255, 0.14)',
-                    borderWidth: '1px',
-                    borderStyle: 'solid',
-                    boxShadow: isFront
-                      ? `0 20px 50px -10px ${project.accentColor}40, 0 0 0 1px ${project.accentColor}80`
-                      : '0 10px 30px -10px rgba(0,0,0,0.7)',
+                    transformStyle: 'preserve-3d',
+                    transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
                   }}
                 >
-                  {/* Project Image & Cinematic Gradient */}
-                  <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    <img
-                      src={project.image}
-                      alt={project.title}
-                      draggable={false}
-                      className="w-full h-full object-cover object-center transition-all duration-700 ease-out"
-                      style={{
-                        transform: isFront ? 'scale(1.04)' : 'scale(1.0)',
-                        filter: isFront
-                          ? 'brightness(0.95) contrast(1.1)'
-                          : 'brightness(0.7) contrast(1.15)',
-                      }}
-                    />
-                    {/* Cinematic Vignette */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#090b10] via-[#090b10]/45 to-transparent" />
-                    <div className="absolute inset-0 bg-gradient-to-b from-[#090b10]/70 via-transparent to-transparent opacity-80" />
-                  </div>
+                  {/* 1. FRONT FACE (Facing Outward: visible when in front arc & not flipped) */}
+                  <div
+                    className={`absolute inset-0 rounded-2xl overflow-hidden transition-all duration-500 ${
+                      isFront
+                        ? 'ring-2 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]'
+                        : 'opacity-85 hover:opacity-100 shadow-[0_15px_35px_-10px_rgba(0,0,0,0.8)]'
+                    }`}
+                    style={{
+                      backfaceVisibility: 'hidden',
+                      WebkitBackfaceVisibility: 'hidden',
+                      WebkitBoxReflect:
+                        'below 8px linear-gradient(transparent 65%, rgba(255, 255, 255, 0.22))',
+                      backgroundColor: '#0c0e14',
+                      borderColor: isFront ? project.accentColor : 'rgba(255, 255, 255, 0.14)',
+                      borderWidth: '1px',
+                      borderStyle: 'solid',
+                      boxShadow: isFront
+                        ? `0 20px 50px -10px ${project.accentColor}40, 0 0 0 1px ${project.accentColor}80`
+                        : '0 10px 30px -10px rgba(0,0,0,0.7)',
+                    }}
+                  >
+                    {/* Project Image & Cinematic Gradient */}
+                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                      <img
+                        src={project.image}
+                        alt={project.title}
+                        draggable={false}
+                        className="w-full h-full object-cover object-center transition-all duration-700 ease-out"
+                        style={{
+                          transform: isFront ? 'scale(1.04)' : 'scale(1.0)',
+                          filter: isFront
+                            ? 'brightness(0.95) contrast(1.1)'
+                            : 'brightness(0.7) contrast(1.15)',
+                        }}
+                      />
+                      {/* Cinematic Vignette */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#090b10] via-[#090b10]/45 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-b from-[#090b10]/70 via-transparent to-transparent opacity-80" />
+                    </div>
 
-                  {/* Top Metadata Bar */}
-                  <div className="relative z-10 p-4 sm:p-5 flex items-center justify-between pointer-events-none">
-                    <span
-                      className="text-[10px] font-mono uppercase tracking-wider px-2.5 py-0.5 rounded-full backdrop-blur-md border transition-colors"
-                      style={{
-                        backgroundColor: isFront ? `${project.accentColor}25` : 'rgba(0,0,0,0.5)',
-                        color: isFront ? '#ffffff' : '#a1a1aa',
-                        borderColor: isFront ? `${project.accentColor}80` : 'rgba(255,255,255,0.1)',
-                      }}
-                    >
-                      {project.category}
-                    </span>
-                  </div>
-
-                  {/* Center Action Pill: Appears ONLY when the user taps on the card */}
-                  <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onSelectProject(project);
-                      }}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-mono font-bold tracking-wider uppercase transition-all duration-300 shadow-[0_10px_30px_rgba(0,0,0,0.6)] cursor-pointer ${
-                        isFront && tappedCardIndex === i
-                          ? 'opacity-100 scale-100 pointer-events-auto bg-white text-black hover:bg-zinc-200 active:scale-95 shadow-[0_0_25px_rgba(255,255,255,0.4)]'
-                          : 'opacity-0 scale-75 pointer-events-none'
-                      }`}
-                    >
-                      <span>View Case Study</span>
-                      <ArrowUpRight className="w-3.5 h-3.5 stroke-[2.5]" />
-                    </button>
-                  </div>
-
-                  {/* Bottom Content Area */}
-                  <div className="absolute bottom-0 inset-x-0 z-10 p-5 sm:p-6 flex flex-col justify-end pointer-events-none">
-                    {/* Client Tag */}
-                    <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 mb-1 flex items-center gap-1.5">
+                    {/* Top Metadata Bar */}
+                    <div className="relative z-10 p-4 sm:p-5 flex items-center justify-between pointer-events-none">
                       <span
-                        className="w-1.5 h-1.5 rounded-full"
-                        style={{ backgroundColor: project.accentColor }}
-                      />
-                      <span>{project.client}</span>
+                        className="text-[10px] font-mono uppercase tracking-wider px-2.5 py-0.5 rounded-full backdrop-blur-md border transition-colors"
+                        style={{
+                          backgroundColor: isFront ? `${project.accentColor}25` : 'rgba(0,0,0,0.5)',
+                          color: isFront ? '#ffffff' : '#a1a1aa',
+                          borderColor: isFront ? `${project.accentColor}80` : 'rgba(255,255,255,0.1)',
+                        }}
+                      >
+                        {project.category}
+                      </span>
+
+                      {/* Subtle "Tap to Flip" badge on front card */}
+                      <div
+                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/15 text-[10px] font-mono text-zinc-300 transition-opacity duration-300 ${
+                          isFront ? 'opacity-90' : 'opacity-0'
+                        }`}
+                      >
+                        <RotateCw className="w-2.5 h-2.5 text-sky-400" />
+                        <span>Tap to Flip</span>
+                      </div>
                     </div>
 
-                    {/* Title */}
-                    <h3 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white mb-1 leading-tight">
-                      {project.title}
-                    </h3>
+                    {/* Bottom Content Area: Client & Title ONLY */}
+                    <div className="absolute bottom-0 inset-x-0 z-10 p-5 sm:p-6 flex flex-col justify-end pointer-events-none">
+                      {/* Client Tag */}
+                      <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 mb-1 flex items-center gap-1.5">
+                        <span
+                          className="w-1.5 h-1.5 rounded-full"
+                          style={{ backgroundColor: project.accentColor }}
+                        />
+                        <span>{project.client}</span>
+                      </div>
 
-                    {/* Short Tagline */}
-                    <p className="text-xs text-zinc-300/90 line-clamp-2 leading-relaxed">
-                      {project.tagline}
-                    </p>
-                  </div>
-                </div>
-
-                {/* 2. BACK FACE (Facing Inward: visible across the ring when in the back arc!) */}
-                <div
-                  className="absolute inset-0 rounded-2xl overflow-hidden p-5 flex flex-col justify-between transition-all duration-500 opacity-75 hover:opacity-100 hover:scale-[1.02]"
-                  style={{
-                    transform: 'rotateY(180deg)',
-                    backfaceVisibility: 'hidden',
-                    WebkitBackfaceVisibility: 'hidden',
-                    WebkitBoxReflect:
-                      'below 8px linear-gradient(transparent 70%, rgba(255, 255, 255, 0.15))',
-                    backgroundColor: '#090b10',
-                    borderColor: `${project.accentColor}40`,
-                    borderWidth: '1px',
-                    borderStyle: 'solid',
-                    boxShadow: `0 15px 35px -10px ${project.accentColor}25, inset 0 0 40px rgba(0,0,0,0.85)`,
-                  }}
-                >
-                  {/* Back face background image with dark frosted blueprint tint */}
-                  <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    <img
-                      src={project.image}
-                      alt=""
-                      draggable={false}
-                      className="w-full h-full object-cover object-center brightness-[0.22] blur-[1px] saturate-50"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-b from-[#090b10]/95 via-[#090b10]/85 to-[#090b10]/95" />
-                    {/* Architectural grid lines */}
-                    <div
-                      className="absolute inset-0 opacity-[0.07]"
-                      style={{
-                        backgroundImage: `linear-gradient(${project.accentColor} 1px, transparent 1px), linear-gradient(90deg, ${project.accentColor} 1px, transparent 1px)`,
-                        backgroundSize: '24px 24px',
-                      }}
-                    />
+                      {/* Title */}
+                      <h3 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white leading-tight">
+                        {project.title}
+                      </h3>
+                    </div>
                   </div>
 
-                  {/* Top Bar */}
-                  <div className="relative z-10 flex items-center justify-start pointer-events-none">
-                    <span
-                      className="text-[10px] font-mono uppercase tracking-wider px-2.5 py-0.5 rounded-full border backdrop-blur-md"
-                      style={{
-                        backgroundColor: `${project.accentColor}20`,
-                        borderColor: `${project.accentColor}50`,
-                        color: '#ffffff',
-                      }}
-                    >
-                      {project.category}
-                    </span>
-                  </div>
-
-                  {/* Center Monogram / Badge & Project Title */}
-                  <div className="relative z-10 flex flex-col items-center text-center my-auto px-2 pointer-events-none">
-                    <div
-                      className="w-12 h-12 rounded-full flex items-center justify-center mb-2.5 border backdrop-blur-md transition-transform group-hover:scale-110 shadow-lg"
-                      style={{
-                        borderColor: `${project.accentColor}60`,
-                        backgroundColor: `${project.accentColor}15`,
-                        boxShadow: `0 0 25px -5px ${project.accentColor}40`,
-                      }}
-                    >
-                      <Sparkles
-                        className="w-5 h-5"
-                        style={{ color: project.accentColor }}
+                  {/* 2. BACK FACE: Description, Technologies & Case Study Button */}
+                  <div
+                    className="absolute inset-0 rounded-2xl overflow-hidden p-5 sm:p-6 flex flex-col justify-between transition-all duration-500"
+                    style={{
+                      transform: 'rotateY(180deg)',
+                      backfaceVisibility: 'hidden',
+                      WebkitBackfaceVisibility: 'hidden',
+                      WebkitBoxReflect:
+                        'below 8px linear-gradient(transparent 70%, rgba(255, 255, 255, 0.15))',
+                      backgroundColor: '#090b10',
+                      borderColor: `${project.accentColor}50`,
+                      borderWidth: '1px',
+                      borderStyle: 'solid',
+                      boxShadow: isFlipped
+                        ? `0 20px 50px -10px ${project.accentColor}40, inset 0 0 40px rgba(0,0,0,0.85)`
+                        : `0 15px 35px -10px ${project.accentColor}25, inset 0 0 40px rgba(0,0,0,0.85)`,
+                    }}
+                  >
+                    {/* Back face background image with dark frosted blueprint tint */}
+                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                      <img
+                        src={project.image}
+                        alt=""
+                        draggable={false}
+                        className="w-full h-full object-cover object-center brightness-[0.16] blur-[2px] saturate-50"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-b from-[#090b10]/95 via-[#090b10]/90 to-[#090b10]/98" />
+                      {/* Architectural grid lines */}
+                      <div
+                        className="absolute inset-0 opacity-[0.07]"
+                        style={{
+                          backgroundImage: `linear-gradient(${project.accentColor} 1px, transparent 1px), linear-gradient(90deg, ${project.accentColor} 1px, transparent 1px)`,
+                          backgroundSize: '24px 24px',
+                        }}
                       />
                     </div>
 
-                    <h4 className="text-base font-extrabold text-white mb-1 tracking-tight line-clamp-1">
-                      {project.title}
-                    </h4>
+                    {/* Top Bar: Category & Flip Back Button */}
+                    <div className="relative z-10 flex items-center justify-between">
+                      <span
+                        className="text-[10px] font-mono uppercase tracking-wider px-2.5 py-0.5 rounded-full border backdrop-blur-md"
+                        style={{
+                          backgroundColor: `${project.accentColor}20`,
+                          borderColor: `${project.accentColor}50`,
+                          color: '#ffffff',
+                        }}
+                      >
+                        {project.category}
+                      </span>
 
-                    <p className="text-[11px] text-zinc-400 line-clamp-2 leading-relaxed mb-3 max-w-[210px]">
-                      {project.tagline}
-                    </p>
-
-                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-[10px] font-mono text-zinc-300 group-hover:bg-white group-hover:text-black transition-colors">
-                      <RotateCcw className="w-3 h-3 text-sky-400 group-hover:text-black" />
-                      <span>Rotate to Front</span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setFlippedCardIndex(null);
+                        }}
+                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-[10px] font-mono text-zinc-300 hover:text-white transition-all cursor-pointer"
+                        title="Flip back to front"
+                      >
+                        <RotateCw className="w-2.5 h-2.5 text-sky-400" />
+                        <span>Flip Back</span>
+                      </button>
                     </div>
-                  </div>
 
-                  {/* Bottom Client */}
-                  <div className="relative z-10 flex items-center justify-start pt-2.5 border-t border-white/10 pointer-events-none">
-                    <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest truncate max-w-[200px]">
-                      {project.client}
-                    </span>
+                    {/* Middle Body: Title, Description, and Technologies */}
+                    <div className="relative z-10 flex flex-col gap-2.5 my-auto">
+                      <div>
+                        <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 mb-0.5 flex items-center gap-1.5">
+                          <span
+                            className="w-1.5 h-1.5 rounded-full"
+                            style={{ backgroundColor: project.accentColor }}
+                          />
+                          <span>{project.client}</span>
+                        </div>
+                        <h4 className="text-base sm:text-lg font-extrabold text-white tracking-tight leading-snug">
+                          {project.title}
+                        </h4>
+                      </div>
+
+                      {/* Description (Tagline) */}
+                      <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10">
+                        <div className="text-[9px] font-mono uppercase tracking-wider text-zinc-500 mb-1">
+                          Overview
+                        </div>
+                        <p className="text-xs text-zinc-300 leading-relaxed line-clamp-3">
+                          {project.tagline}
+                        </p>
+                      </div>
+
+                      {/* Technologies */}
+                      <div>
+                        <div className="text-[9px] font-mono uppercase tracking-wider text-zinc-500 mb-1.5 flex items-center justify-between">
+                          <span>Technologies</span>
+                          <span className="text-[9px] text-zinc-600 font-normal">{project.stack.length} tools</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1 max-h-[64px] overflow-hidden">
+                          {project.stack.map((tech) => (
+                            <span
+                              key={tech}
+                              className="px-2 py-0.5 rounded-md text-[10px] font-mono bg-white/[0.05] border border-white/10 text-zinc-300"
+                            >
+                              {tech}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Bottom Footer: View Case Study Button */}
+                    <div className="relative z-10 pt-2.5 border-t border-white/10">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSelectProject(project);
+                        }}
+                        className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-xl text-xs font-mono font-bold tracking-wider uppercase bg-white text-black hover:bg-zinc-200 active:scale-[0.98] transition-all shadow-lg cursor-pointer"
+                      >
+                        <span>View Case Study</span>
+                        <ArrowUpRight className="w-3.5 h-3.5 stroke-[2.5]" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -584,8 +614,8 @@ export const RingShowcase: React.FC<RingShowcaseProps> = ({
           <Sparkles className="w-3.5 h-3.5 text-sky-400" />
           <span>
             {dimensions.isMobile
-              ? 'Swipe to spin · Tap any card to rotate'
-              : 'Continuous 360° spin · Hover to pause · Click any card (front or back) to rotate to center · Arrow keys ← →'}
+              ? 'Swipe to spin · Tap any card to flip and view details'
+              : 'Continuous 360° spin · Tap any card to flip and view details · Drag or arrow keys to rotate'}
           </span>
         </div>
 
