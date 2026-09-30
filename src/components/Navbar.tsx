@@ -54,7 +54,7 @@ export const Navbar: React.FC = () => {
             className="hover:text-amber-400 transition-colors cursor-pointer flex items-center gap-1.5"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-            <span>Showcase (05)</span>
+            <span>Showcase (06)</span>
           </button>
           <button
             onClick={() => scrollTo('bento-grid')}

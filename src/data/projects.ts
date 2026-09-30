@@ -3,7 +3,7 @@ import type { Project } from '../types/project';
 export const PROJECTS: Project[] = [
   {
     id: 'aura-synapse',
-    index: '01 / 05',
+    index: '01 / 06',
     title: 'AURA SYNAPSE',
     tagline: 'Audio-reactive 120 FPS volumetric neural lattice in client browser',
     category: 'Creative Dev & WebGL',
@@ -37,7 +37,7 @@ export const PROJECTS: Project[] = [
   },
   {
     id: 'kronos-zero',
-    index: '02 / 05',
+    index: '02 / 06',
     title: 'KRONOS ZERO',
     tagline: 'Sub-millisecond institutional order book & execution interface',
     category: 'Fintech Systems',
@@ -71,7 +71,7 @@ export const PROJECTS: Project[] = [
   },
   {
     id: 'hyperion-os',
-    index: '03 / 05',
+    index: '03 / 06',
     title: 'HYPERION OS',
     tagline: 'Autonomous multi-agent orchestration canvas with spatial DAG execution',
     category: 'AI & Distributed Systems',
@@ -105,7 +105,7 @@ export const PROJECTS: Project[] = [
   },
   {
     id: 'vortex-neural',
-    index: '04 / 05',
+    index: '04 / 06',
     title: 'VORTEX NEURAL',
     tagline: 'Global edge network mesh with predictive self-healing telemetry',
     category: 'Cloud Infrastructure',
@@ -139,7 +139,7 @@ export const PROJECTS: Project[] = [
   },
   {
     id: 'echo-protocol',
-    index: '05 / 05',
+    index: '05 / 06',
     title: 'ECHO PROTOCOL',
     tagline: 'Zero-knowledge biometric cryptographic identity & privacy vault',
     category: 'Security & Cryptography',
@@ -169,6 +169,40 @@ export const PROJECTS: Project[] = [
         'Initial 32MB zk-SNARK prover keys caused mobile browser tab crashes due to RAM exhaustion during initialization. We partitioned keys into compressed sparse matrices and loaded them on-demand via WebAssembly streaming instantiation.',
       keyTakeaway:
         'Privacy should not feel slow or arcane; pairing cutting-edge cryptography with fluid 60 FPS cinematic motion transforms complex security into an empowering user ritual.'
+    }
+  },
+  {
+    id: 'nebula-ray',
+    index: '06 / 06',
+    title: 'NEBULA RAY',
+    tagline: 'Real-time hardware-accelerated WebGPU path tracer & photon irradiance field',
+    category: 'Graphics & Simulation',
+    year: '2025',
+    client: 'Luminescent Dynamics',
+    image: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=1600&auto=format&fit=crop',
+    accentColor: '#06b6d4',
+    stack: ['WebGPU', 'WGSL Shaders', 'BVH Acceleration', 'Compute Pipelines', 'TypeScript'],
+    caseStudy: {
+      problem:
+        'Rendering photorealistic global illumination with complex refractive dielectrics inside standard client browser tabs exceeded 16ms frame budgets by over 300%.',
+      whyThisApproach:
+        'Constructed a two-level bounding volume hierarchy (BVH) traversed directly inside asynchronous WebGPU compute shaders with spatiotemporal reservoir resampling (ReSTIR) and blue-noise spatial filtering.',
+      architecture: [
+        'Custom WGSL wavefront path tracing compute pipeline with zero host sync',
+        'Spatiotemporal reservoir resampling (ReSTIR) for multi-bounce direct lighting',
+        'Memory-aligned uniform buffers mapped directly to GPU high-bandwidth VRAM',
+        'Half-precision 16-bit spherical harmonic irradiance caching'
+      ],
+      metrics: [
+        { label: 'Real-time Framerate', value: '60 FPS 4K' },
+        { label: 'Convergence Rate', value: '16 samples/px' },
+        { label: 'Ray Throughput', value: '120M rays/s' },
+        { label: 'VRAM Footprint', value: '< 180MB' }
+      ],
+      whatBroke:
+        'Dynamic ray divergence on mobile GPUs triggered severe SIMD warp serialization. We sorted active rays into coherent 3D Morton-code spatial bins prior to BVH traversal, recovering 78% throughput.',
+      keyTakeaway:
+        'The modern browser is a first-class real-time graphics workstation when shaders are aligned directly to hardware compute units.'
     }
   }
 ];

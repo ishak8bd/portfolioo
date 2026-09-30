@@ -1,6 +1,21 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { motion, useAnimationFrame, useMotionValue, useTransform, useInView } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Pause, Play, MoveHorizontal, RotateCcw, Layers } from 'lucide-react';
+import {
+  motion,
+  useAnimationFrame,
+  useMotionValue,
+  useTransform,
+  useInView,
+  MotionValue,
+} from 'framer-motion';
+import {
+  ChevronLeft,
+  ChevronRight,
+  Pause,
+  Play,
+  MoveHorizontal,
+  RotateCcw,
+  Layers,
+} from 'lucide-react';
 import type { Project } from '../types/project';
 import { ProjectCard } from './ProjectCard';
 
@@ -11,7 +26,7 @@ interface MarqueeShowcaseProps {
   onToggleViewMode?: (mode: 'ring' | 'marquee') => void;
 }
 
-type EntrancePhase = 'idle' | 'spinning' | 'expanding' | 'looping';
+type EntrancePhase = 'spinning' | 'unfolding' | 'looping';
 
 // Robust mathematical wrap within [min, max)
 function wrapRange(min: number, max: number, v: number): number {
@@ -19,6 +34,151 @@ function wrapRange(min: number, max: number, v: number): number {
   if (range <= 0) return min;
   return ((((v - min) % range) + range) % range) + min;
 }
+
+// Smooth cubic easing for unfold progress
+function easeInOutCubic(x: number): number {
+  return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+}
+
+// Constants for 6 cards per set
+const GAP = 24;
+const CARD_PITCH = 404; // 380px card + 24px gap
+const NUM_CARDS = 6;
+const SET_STRIDE = NUM_CARDS * CARD_PITCH; // 2424px
+const RING_RADIUS = 440; // Ring orbit radius in px
+const INITIAL_TILT = 22; // rotateX degrees
+
+/**
+ * Dedicated Entrance Card component
+ * Driven by shared MotionValues: unfoldProgress (0 -> 1), ringRotation, and entranceTime.
+ * All cards interpolate in lockstep via useTransform with zero independent timers.
+ */
+interface EntranceCardProps {
+  index: number;
+  project: Project;
+  unfoldProgress: MotionValue<number>;
+  ringRotation: MotionValue<number>;
+  entranceTime: MotionValue<number>;
+  onCardClick: (project: Project) => void;
+}
+
+const EntranceCard: React.FC<EntranceCardProps> = ({
+  index,
+  project,
+  unfoldProgress,
+  ringRotation,
+  entranceTime,
+  onCardClick,
+}) => {
+  // Base angular position on the 6-card ring (60 deg intervals)
+  const baseAngleDeg = index * 60;
+
+  // Row coordinate relative to Set 1 center (midpoint between card 2 and 3 = index 2.5 * 404)
+  const rowX = (index - 2.5) * CARD_PITCH;
+
+  // Stagger entry threshold (~0.28s each)
+  const entryTime = index * 0.28;
+
+  // 1. Transform: position, tilt, rotation, and scale derived in lockstep
+  const cardTransform = useTransform(
+    [unfoldProgress, ringRotation, entranceTime],
+    (values: (string | number)[]) => {
+      const p = Number(values[0]);
+      const rot = Number(values[1]);
+      const t = Number(values[2]);
+
+      // If already in looping marquee, return exact flat row layout
+      if (p >= 1) {
+        return 'translate3d(0px, 0px, 0px) rotateX(0deg) rotateY(0deg) scale(1)';
+      }
+
+      // Phase 1 Entrance Stagger scale
+      let entryScale = 1;
+      if (t < entryTime) {
+        entryScale = 0.5;
+      } else if (t < entryTime + 0.35) {
+        const entryProgress = Math.min((t - entryTime) / 0.35, 1);
+        entryScale = 0.6 + 0.4 * entryProgress;
+      }
+
+      // Ring 3D Orbit coordinates
+      const currentAngleDeg = baseAngleDeg + rot;
+      const angleRad = (currentAngleDeg * Math.PI) / 180;
+
+      // Un-tilted orbit position in X-Z plane
+      const ringX = RING_RADIUS * Math.sin(angleRad);
+      const ringZ = RING_RADIUS * Math.cos(angleRad);
+
+      // Current tilt angle relaxes from 22deg to 0deg
+      const currentTiltDeg = INITIAL_TILT * (1 - p);
+      const tiltRad = (currentTiltDeg * Math.PI) / 180;
+
+      // Tilted ring projection: nearer cards (ringZ > 0) are lower on screen and closer
+      const ringY = ringZ * Math.sin(tiltRad);
+      const ringZProjected = ringZ * Math.cos(tiltRad);
+
+      // Card facing angle on the ring
+      const ringRotY = -currentAngleDeg * 0.55;
+
+      // Perspective depth scaling: nearer cards larger, farther cards smaller
+      const depthScaleFactor = 1 + ringZProjected / 1400;
+
+      // Interpolate from ring position to final row position (x = rowX, y = 0, z = 0, rot = 0)
+      const currentX = (1 - p) * ringX + p * rowX;
+      const currentY = (1 - p) * ringY;
+      const currentZ = (1 - p) * ringZProjected;
+      const currentRotY = (1 - p) * ringRotY;
+      const currentRotX = (1 - p) * currentTiltDeg;
+      const currentScale = entryScale * ((1 - p) * depthScaleFactor + p * 1.0);
+
+      // Relative delta from natural flex layout position in Set 1
+      const deltaX = currentX - rowX;
+      const deltaY = currentY;
+      const deltaZ = currentZ;
+
+      return `translate3d(${deltaX.toFixed(2)}px, ${deltaY.toFixed(2)}px, ${deltaZ.toFixed(2)}px) rotateX(${currentRotX.toFixed(2)}deg) rotateY(${currentRotY.toFixed(2)}deg) scale(${currentScale.toFixed(3)})`;
+    }
+  );
+
+  // 2. Opacity: staggered entry in Phase 1, full opacity afterwards
+  const cardOpacity = useTransform(
+    [unfoldProgress, entranceTime],
+    (values: (string | number)[]) => {
+      const p = Number(values[0]);
+      const t = Number(values[1]);
+      if (p >= 1) return 1;
+      if (t < entryTime) return 0;
+      if (t < entryTime + 0.35) return Math.min((t - entryTime) / 0.35, 1);
+      return 1;
+    }
+  );
+
+  // 3. Shadow / Glow: edge accent glow during ring phase, normal shadow in row phase
+  const cardBoxShadow = useTransform(unfoldProgress, (p: number) => {
+    if (p >= 0.95) {
+      return '0 10px 30px -15px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.07)';
+    }
+    const glowAlpha = Math.round((1 - p) * 45);
+    const glowHex = glowAlpha > 0 ? glowAlpha.toString(16).padStart(2, '0') : '00';
+    return `0 15px 35px -10px ${project.accentColor}${glowHex}, 0 0 0 1px ${project.accentColor}50`;
+  });
+
+  return (
+    <motion.div
+      style={{
+        transform: cardTransform,
+        opacity: cardOpacity,
+        boxShadow: cardBoxShadow,
+        transformStyle: 'preserve-3d',
+        borderRadius: '1rem',
+        willChange: 'transform, opacity',
+      }}
+      className="relative flex-shrink-0 transition-shadow duration-300"
+    >
+      <ProjectCard project={project} onClick={() => onCardClick(project)} />
+    </motion.div>
+  );
+};
 
 export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
   projects,
@@ -32,24 +192,24 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
   const firstSetRef = useRef<HTMLDivElement>(null);
   const scrollTrackRef = useRef<HTMLDivElement>(null);
 
-  // In-view detection to trigger entrance
+  // In-view detection
   const isInView = useInView(sectionRef, { once: true, margin: '-60px 0px' });
   const [phase, setPhase] = useState<EntrancePhase>('looping');
   const [entranceKey, setEntranceKey] = useState(0);
   const hasTriggeredEntrance = useRef(false);
-  const phaseTimersRef = useRef<number[]>([]);
 
-  // Mathematical constants for 380px card + 24px gap
-  const CARD_PITCH = 404;
-  const SET_STRIDE = projects.length * CARD_PITCH; // 2020px for 5 cards
+  // Motion values for the entrance sequence
+  const unfoldProgress = useMotionValue(1); // 0 during ring, 0 -> 1 during unfold, 1 in looping
+  const ringRotation = useMotionValue(0);
+  const entranceTime = useMotionValue(0);
+  const entranceStartTimeRef = useRef<number | null>(null);
 
-  // Motion values and state
+  // Marquee track motion value
   const x = useMotionValue(0);
   const [singleSetWidth, setSingleSetWidth] = useState(SET_STRIDE);
   const [isHovered, setIsHovered] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isUserActive, setIsUserActive] = useState(false);
-  const [activeProjectIndex, setActiveProjectIndex] = useState(0);
 
   // Drag & momentum tracking
   const isPointerDownRef = useRef(false);
@@ -60,53 +220,46 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
   const totalDragDistanceRef = useRef(0);
   const dragVelocityRef = useRef(0);
   const wheelTimeoutRef = useRef<number | null>(null);
-  const lastActiveIndexRef = useRef(0);
 
-  // Auto-scroll configuration
-  const baseSpeed = 46; // pixels per second
-  const direction = -1; // -1 for scrolling left, 1 for scrolling right
+  // Auto-scroll configuration: 46 px/sec constant drift LEFT
+  const baseSpeed = 46;
+  const direction = -1;
 
-  // Clear pending timers
-  const clearTimers = useCallback(() => {
-    phaseTimersRef.current.forEach((t) => clearTimeout(t));
-    phaseTimersRef.current = [];
+  // Center alignment helper: centers the 6-card row in the viewport
+  const getCenteredX = useCallback(() => {
+    if (!containerRef.current) return -SET_STRIDE / 2;
+    const viewportWidth = containerRef.current.offsetWidth;
+    const setMidpoint = SET_STRIDE / 2; // 1212px
+    return wrapRange(-SET_STRIDE, 0, viewportWidth / 2 - setMidpoint);
   }, []);
 
-  // Launch the 3-phase flat spinning-plate entrance
+  // Launch the unified continuous 3-phase entrance
   const startEntranceSequence = useCallback(() => {
-    clearTimers();
+    // Check prefers-reduced-motion
+    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      unfoldProgress.set(1);
+      ringRotation.set(0);
+      entranceTime.set(10);
+      setPhase('looping');
+      x.set(getCenteredX());
+      return;
+    }
+
     setEntranceKey((k) => k + 1);
     setPhase('spinning');
+    unfoldProgress.set(0);
+    ringRotation.set(0);
+    entranceTime.set(0);
+    entranceStartTimeRef.current = performance.now();
 
-    // Align initial track position so Card 2 (middle) is exactly centered in viewport
-    if (singleSetWidth > 0 && containerRef.current) {
-      const cardHalfWidth = 190;
-      const centerOffset = containerRef.current.offsetWidth / 2 - (2 * CARD_PITCH + cardHalfWidth);
-      x.set(wrapRange(-singleSetWidth, 0, centerOffset));
-    }
+    // Initialize track position to exact centered alignment
+    x.set(getCenteredX());
+  }, [getCenteredX, unfoldProgress, ringRotation, entranceTime, x]);
 
-    // Phase 1 (0.0s - 2.0s): Parent plate spins 360 over 2.0s while cards pop in
-    const t1 = window.setTimeout(() => {
-      // Phase 2 (2.0s - 2.8s): Parent scales 0.58 -> 1.0 AND cards expand from compactOffset -> 0
-      setPhase('expanding');
-    }, 2000);
-
-    const t2 = window.setTimeout(() => {
-      // Phase 3 (2.8s+): Marquee loop takes over seamlessly at the exact current position
-      setPhase('looping');
-    }, 2800);
-
-    phaseTimersRef.current = [t1, t2];
-  }, [clearTimers, singleSetWidth, x]);
-
-  // Initial alignment: Center Card 2 immediately on mount
+  // Center immediately on mount
   useEffect(() => {
-    if (containerRef.current) {
-      const cardHalfWidth = 190;
-      const centerOffset = containerRef.current.offsetWidth / 2 - (2 * CARD_PITCH + cardHalfWidth);
-      x.set(wrapRange(-SET_STRIDE, 0, centerOffset));
-    }
-  }, [containerRef, x, SET_STRIDE]);
+    x.set(getCenteredX());
+  }, [getCenteredX, x]);
 
   // Trigger when scrolled into view
   useEffect(() => {
@@ -116,89 +269,94 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
     }
   }, [isInView, startEntranceSequence]);
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => clearTimers();
-  }, [clearTimers]);
-
-  // Replay entrance
+  // Replay entrance handler
   const replayEntrance = () => {
     startEntranceSequence();
   };
 
-  // Derived motion value for the scrollbar thumb position (range: 0% to 80%)
-  const thumbLeft = useTransform(x, (val) => {
-    if (singleSetWidth <= 0) return '0%';
-    const normalized = ((-val % singleSetWidth) + singleSetWidth) % singleSetWidth;
-    const ratio = normalized / singleSetWidth;
-    return `${ratio * 80}%`;
-  });
-
-  // Measure the width of one single set of cards + 24px gap between sets
+  // Measure single set width accurately
   const measureWidth = useCallback(() => {
     if (firstSetRef.current) {
       const width = firstSetRef.current.offsetWidth;
       if (width > 0) {
-        // In flex layout with gap-6 (24px), the distance between card 0 of Set 1
-        // and card 0 of Set 2 is set width + 24px inter-set gap = 2020px.
-        setSingleSetWidth(width + 24);
+        setSingleSetWidth(width + GAP);
       }
     }
   }, []);
 
   useEffect(() => {
     measureWidth();
-    const handleResize = () => measureWidth();
-    window.addEventListener('resize', handleResize);
+    const ro = new ResizeObserver(() => measureWidth());
+    if (firstSetRef.current) ro.observe(firstSetRef.current);
+    if (containerRef.current) ro.observe(containerRef.current);
+    return () => ro.disconnect();
+  }, [measureWidth]);
 
-    const observer = new ResizeObserver(() => measureWidth());
-    if (firstSetRef.current) {
-      observer.observe(firstSetRef.current);
-    }
+  // Single unified Game Loop for Entrance and Marquee Auto-Scroll
+  useAnimationFrame((_time, delta) => {
+    const dt = Math.min(delta / 1000, 0.1);
 
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      observer.disconnect();
-    };
-  }, [measureWidth, projects]);
+    // ==========================================
+    // ENTRANCE SEQUENCE (Phase 1 & 2)
+    // ==========================================
+    if (phase !== 'looping' && entranceStartTimeRef.current !== null) {
+      const elapsed = (performance.now() - entranceStartTimeRef.current) / 1000;
+      entranceTime.set(elapsed);
 
-  // Frame animation loop (active once in looping phase or idle)
-  useAnimationFrame((_, delta) => {
-    if (phase !== 'looping') return;
-    if (singleSetWidth <= 0) return;
+      // Phase 1 (0.0s - 2.4s): Ring forms and spins counter-clockwise
+      if (elapsed < 2.4) {
+        // Continuous counter-clockwise rotation (~190 deg/s)
+        const rotSpeed = 190;
+        ringRotation.set(elapsed * rotSpeed);
+        unfoldProgress.set(0);
+      }
+      // Phase 2 (2.4s - 4.4s): Simultaneous approach, ring tilt flattening, and unfold into row
+      else if (elapsed < 4.4) {
+        if (phase !== 'unfolding') {
+          setPhase('unfolding');
+        }
 
-    const currentX = x.get();
-    let nextX = currentX;
+        const unfoldDuration = 2.0; // 2.4s to 4.4s
+        const rawProgress = (elapsed - 2.4) / unfoldDuration;
+        const clampedProgress = Math.min(Math.max(rawProgress, 0), 1);
+        const easedP = easeInOutCubic(clampedProgress);
 
-    if (isPointerDownRef.current || isScrubbingRef.current) {
+        unfoldProgress.set(easedP);
+
+        // Smooth rotation deceleration handing off into horizontal orientation
+        const initialSpin = 2.4 * 190; // 456 degrees
+        const finalAlignmentTurn = 104; // brings cards into clean horizontal alignment
+        const deceleratedTurn = finalAlignmentTurn * (1 - Math.pow(1 - clampedProgress, 2));
+        ringRotation.set(initialSpin + deceleratedTurn);
+      }
+      // Phase 3 (4.4s+): Seamless Handoff to Marquee
+      else {
+        unfoldProgress.set(1);
+        setPhase('looping');
+        entranceStartTimeRef.current = null;
+        x.set(getCenteredX());
+      }
       return;
     }
 
-    // Apply residual momentum if present
+    // ==========================================
+    // CONTINUOUS MARQUEE ENGINE (Phase 3)
+    // ==========================================
+    if (isDragging || isScrubbingRef.current) return;
+
+    // Apply inertia velocity decay when released
     if (Math.abs(dragVelocityRef.current) > 0.05) {
-      nextX += dragVelocityRef.current;
-      dragVelocityRef.current *= 0.94; // friction decay
-    } else {
-      dragVelocityRef.current = 0;
+      const nextPos = x.get() + dragVelocityRef.current;
+      x.set(wrapRange(-singleSetWidth, 0, nextPos));
+      dragVelocityRef.current *= 0.92;
+      return;
     }
 
-    // Continuous auto-scroll when not hovered and not wheeling/scrubbing
+    // Constant auto-scroll drifting LEFT
     if (!isHovered && !isUserActive) {
-      const deltaSeconds = Math.min(delta / 1000, 0.1);
-      const autoMove = direction * baseSpeed * deltaSeconds;
-      nextX += autoMove;
-    }
-
-    // Mathematical wrap in [-singleSetWidth, 0)
-    const wrapped = wrapRange(-singleSetWidth, 0, nextX);
-    x.set(wrapped);
-
-    // Update active project index efficiently
-    const currentRatio = (((-wrapped % singleSetWidth) + singleSetWidth) % singleSetWidth) / singleSetWidth;
-    const computedIndex = Math.min(Math.floor(currentRatio * projects.length), projects.length - 1);
-    if (computedIndex !== lastActiveIndexRef.current) {
-      lastActiveIndexRef.current = computedIndex;
-      setActiveProjectIndex(computedIndex);
+      const currentX = x.get();
+      const nextX = currentX + baseSpeed * direction * dt;
+      x.set(wrapRange(-singleSetWidth, 0, nextX));
     }
   });
 
@@ -253,7 +411,7 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
     }
   };
 
-  // Scrollbar Scrubbing handlers
+  // Scrubber handlers
   const handleScrubberInteraction = (clientX: number) => {
     if (!scrollTrackRef.current || singleSetWidth <= 0) return;
 
@@ -262,26 +420,28 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
     if (usableWidth <= 0) return;
 
     const rawOffset = clientX - rect.left;
-    const clampedRatio = Math.max(0, Math.min(1, rawOffset / usableWidth));
+    const clampedOffset = Math.max(0, Math.min(rawOffset, usableWidth));
+    const ratio = clampedOffset / usableWidth;
 
-    const targetMarqueeX = -clampedRatio * singleSetWidth;
-    x.set(wrapRange(-singleSetWidth, 0, targetMarqueeX));
+    const targetPos = -ratio * singleSetWidth;
+    x.set(wrapRange(-singleSetWidth, 0, targetPos));
     dragVelocityRef.current = 0;
   };
 
-  const handleTrackPointerDown = (e: React.PointerEvent) => {
-    if (e.button !== 0) return;
+  const handleScrubberPointerDown = (e: React.PointerEvent) => {
+    if (phase !== 'looping') return;
     isScrubbingRef.current = true;
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    setIsUserActive(true);
     handleScrubberInteraction(e.clientX);
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   };
 
-  const handleTrackPointerMove = (e: React.PointerEvent) => {
+  const handleScrubberPointerMove = (e: React.PointerEvent) => {
     if (!isScrubbingRef.current) return;
     handleScrubberInteraction(e.clientX);
   };
 
-  const handleTrackPointerUp = (e: React.PointerEvent) => {
+  const handleScrubberPointerUp = (e: React.PointerEvent) => {
     if (!isScrubbingRef.current) return;
     isScrubbingRef.current = false;
     try {
@@ -289,33 +449,12 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
     } catch {
       // Ignored
     }
-  };
-
-  // Direct Jump Pill Click
-  const jumpToProject = (targetIndex: number) => {
-    if (singleSetWidth <= 0 || projects.length === 0) return;
-
-    const targetRatio = targetIndex / projects.length;
-    const targetX = -targetRatio * singleSetWidth;
-
-    dragVelocityRef.current = 0;
-    x.set(wrapRange(-singleSetWidth, 0, targetX));
-    setActiveProjectIndex(targetIndex);
-    lastActiveIndexRef.current = targetIndex;
-  };
-
-  // Nudge controls
-  const nudge = (amount: number) => {
-    if (singleSetWidth <= 0) return;
-    dragVelocityRef.current = amount;
-    setIsUserActive(true);
-    if (wheelTimeoutRef.current) clearTimeout(wheelTimeoutRef.current);
-    wheelTimeoutRef.current = window.setTimeout(() => {
+    setTimeout(() => {
       setIsUserActive(false);
     }, 600);
   };
 
-  // Mouse wheel horizontal translation
+  // Wheel horizontal translation
   const handleWheel = (e: React.WheelEvent) => {
     if (phase !== 'looping') return;
     const rawDelta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
@@ -344,40 +483,77 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
     onSelectProject(project);
   };
 
+  // Chevron manual nudge
+  const nudge = (amountPercent: number) => {
+    if (!containerRef.current || phase !== 'looping') return;
+    const nudgePx = (containerRef.current.offsetWidth * (amountPercent / 100));
+    const nextPos = x.get() + nudgePx;
+    x.set(wrapRange(-singleSetWidth, 0, nextPos));
+    dragVelocityRef.current = nudgePx * 0.08;
+    setIsUserActive(true);
+    setTimeout(() => setIsUserActive(false), 800);
+  };
+
+  // Scrubber thumb position derived from wrap position
+  const thumbLeft = useTransform(x, (val) => {
+    if (singleSetWidth <= 0) return '0%';
+    const normalized = ((-val % singleSetWidth) + singleSetWidth) % singleSetWidth;
+    const ratio = normalized / singleSetWidth;
+    return `${ratio * 80}%`;
+  });
+
+  // Soft diagonal light streak opacity during entrance
+  const streakOpacity = useTransform(unfoldProgress, [0, 0.4, 1], [0.75, 0.4, 0]);
+
+  // Ring parent approach translation: moves closer (translateZ: -160px -> 0px) and scale 0.88 -> 1.0
+  const ringScale = useTransform(unfoldProgress, [0, 1], [0.88, 1.0]);
+
   return (
     <section
       ref={sectionRef}
-      className="relative w-full py-16 md:py-24 overflow-hidden border-y border-white/5 bg-[#060709]"
+      id="marquee-showcase"
+      className="relative w-full py-16 md:py-24 overflow-hidden border-y border-white/5 bg-[#060709] scroll-mt-20 select-none"
     >
-      {/* Background Radial Light Accent (Subtle Cyan/Sky ambiance) */}
+      {/* Background Ambient Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[400px] bg-sky-500/[0.04] blur-[120px] rounded-full pointer-events-none" />
+
+      {/* Soft Diagonal Accent Light Streak (fades in during ring phase, eases out as row settles) */}
+      <motion.div
+        style={{
+          opacity: streakOpacity,
+        }}
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1100px] h-[280px] bg-gradient-to-r from-transparent via-sky-400/[0.08] to-transparent blur-[90px] rotate-[-20deg] pointer-events-none will-change-transform"
+      />
 
       {/* Section Header */}
       <motion.div
-        initial={{ opacity: 0, y: 35, filter: 'blur(5px)' }}
-        whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-60px' }}
-        transition={{ duration: 0.75, ease: [0.21, 0.47, 0.32, 0.98] }}
+        transition={{ duration: 0.65, ease: 'easeOut' }}
         className="max-w-7xl mx-auto px-6 sm:px-8 mb-8 sm:mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 relative z-10"
       >
         <div>
           <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-sky-400 mb-2">
             <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse" />
-            <span>Curated Showcase • 05 Flagships</span>
+            <span>Curated Showcase • 06 Flagships</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white">
-            Engineered Works
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white flex items-center gap-3">
+            <span>Engineered Works</span>
+            <span className="text-xs font-mono px-2.5 py-1 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20 font-normal">
+              Marquee
+            </span>
           </h2>
           <p className="mt-2 text-sm sm:text-base text-zinc-400 max-w-xl">
-            {phase === 'spinning' || phase === 'expanding'
-              ? 'Synchronized 3D cluster assembly resolving into continuous marquee line...'
+            {phase !== 'looping'
+              ? 'Synchronized 3D ring orbit unfolding into continuous horizontal stream...'
               : 'Hover to pause. Drag, scroll or scrub the bar below to navigate. Click any card for the architectural breakdown.'}
           </p>
         </div>
 
         {/* Status & Control Indicators */}
         <div className="flex flex-wrap items-center gap-3">
-          {/* View Mode Toggle: 3D Ring vs Marquee */}
+          {/* View Mode Switcher */}
           {onToggleViewMode && (
             <div className="flex items-center p-1 rounded-full bg-white/[0.04] border border-white/10 text-xs font-mono">
               <button
@@ -405,11 +581,17 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
             </div>
           )}
 
+          {/* Status Indicator */}
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/10 text-xs font-mono text-zinc-400">
-            {phase !== 'looping' ? (
+            {phase === 'spinning' ? (
               <>
                 <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping" />
-                <span className="text-sky-300">Assembling</span>
+                <span className="text-sky-300">Ring Orbit</span>
+              </>
+            ) : phase === 'unfolding' ? (
+              <>
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+                <span className="text-indigo-300">Unfolding</span>
               </>
             ) : isHovered || isDragging || isUserActive ? (
               <>
@@ -424,37 +606,35 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
             )}
           </div>
 
+          {/* Replay Entrance Button */}
           <button
             onClick={replayEntrance}
-            disabled={phase === 'spinning' || phase === 'expanding'}
-            className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-mono transition-all ${
-              phase === 'spinning' || phase === 'expanding'
+            disabled={phase !== 'looping'}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-mono transition-all ${
+              phase !== 'looping'
                 ? 'bg-white/[0.01] border-white/5 text-zinc-600 cursor-not-allowed'
-                : 'bg-white/[0.03] hover:bg-white/[0.08] border-white/10 text-zinc-300 hover:text-white'
+                : 'bg-white/[0.03] hover:bg-white/[0.08] border-white/10 text-zinc-300 hover:text-white cursor-pointer'
             }`}
-            title="Replay coordinated 3D entrance"
+            title="Replay synchronized 3D ring unfold entrance"
           >
-            <RotateCcw className={`w-3 h-3 ${phase === 'spinning' ? 'animate-spin text-sky-400' : 'text-sky-400'}`} />
+            <RotateCcw className={`w-3 h-3 ${phase !== 'looping' ? 'animate-spin text-sky-400' : 'text-sky-400'}`} />
             <span>{phase === 'looping' ? 'Replay Entrance' : 'Assembling...'}</span>
           </button>
 
-          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/10 text-xs font-mono text-zinc-400">
-            <MoveHorizontal className="w-3.5 h-3.5 text-zinc-500" />
-            <span>Interactive</span>
-          </div>
-
-          {/* Quick Manual Nudge Controls */}
+          {/* Nudge Controls */}
           <div className="flex items-center gap-1">
             <button
               onClick={() => nudge(22)}
-              className="p-2 rounded-full bg-white/5 hover:bg-white/15 border border-white/10 text-zinc-300 hover:text-white transition-colors"
+              disabled={phase !== 'looping'}
+              className="p-2 rounded-full bg-white/5 hover:bg-white/15 border border-white/10 text-zinc-300 hover:text-white transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
               aria-label="Scroll left"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               onClick={() => nudge(-22)}
-              className="p-2 rounded-full bg-white/5 hover:bg-white/15 border border-white/10 text-zinc-300 hover:text-white transition-colors"
+              disabled={phase !== 'looping'}
+              className="p-2 rounded-full bg-white/5 hover:bg-white/15 border border-white/10 text-zinc-300 hover:text-white transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
               aria-label="Scroll right"
             >
               <ChevronRight className="w-4 h-4" />
@@ -473,7 +653,7 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
-        style={{ perspective: 1200 }}
+        style={{ perspective: 1400, perspectiveOrigin: '50% 48%' }}
         className={`relative w-full overflow-hidden select-none touch-pan-y ${
           isDragging ? 'cursor-grabbing' : 'cursor-grab'
         }`}
@@ -486,86 +666,41 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
         <motion.div
           ref={trackRef}
           style={{ x, transformStyle: 'preserve-3d' }}
-          className="flex gap-5 sm:gap-6 will-change-transform py-4"
+          className="flex gap-6 will-change-transform py-6"
         >
-          {/* Set 1: SHARED ROTATING GROUP (The 5 cards rotating together on one flat plate) */}
+          {/* Set 1: SHARED GROUP (Ring Formation -> 3D Unfold into Row) */}
           <motion.div
-            key={`rotating-plate-${entranceKey}`}
+            key={`ring-group-${entranceKey}`}
             ref={firstSetRef}
-            animate={{
-              rotateY: phase === 'spinning' ? [0, 360] : 0,
-              scale: phase === 'spinning' ? 0.58 : 1.0,
-            }}
-            transition={{
-              rotateY: {
-                duration: 2.0,
-                ease: 'easeInOut',
-              },
-              scale: {
-                duration: phase === 'expanding' ? 0.8 : 0.35,
-                ease: [0.16, 1, 0.3, 1],
-              },
-            }}
             style={{
               transformStyle: 'preserve-3d',
+              scale: ringScale,
               transformOrigin: 'center center',
+              willChange: 'transform',
             }}
-            className="flex gap-5 sm:gap-6 shrink-0 will-change-transform"
+            className="flex gap-6 shrink-0 will-change-transform"
           >
-            {projects.map((project, index) => {
-              const k = index - 2; // -2, -1, 0, 1, 2 relative to middle card (Card 2)
-              // Natural flex distance from Card 2 is k * 404px.
-              // Spacing cards by 184px in Phase 1 creates a natural 54% fanned deck where each card's
-              // visual identity is preserved, then expands outward into full 404px marquee slots:
-              // compactOffset = k * (184 - 404) = k * -220px!
-              const compactOffset = k * -220;
-
-              return (
-                <motion.div
-                  key={`set1-${project.id}-${entranceKey}`}
-                  initial={{ scale: 0.4, opacity: 0 }}
-                  animate={{
-                    scale: phase === 'idle' ? 0.4 : 1,
-                    opacity: phase === 'idle' ? 0 : 1,
-                    x: phase === 'spinning' ? compactOffset : 0,
-                  }}
-                  transition={{
-                    scale: {
-                      delay: phase === 'spinning' ? index * 0.28 : 0,
-                      duration: 0.45,
-                      ease: [0.16, 1, 0.3, 1],
-                    },
-                    opacity: {
-                      delay: phase === 'spinning' ? index * 0.28 : 0,
-                      duration: 0.38,
-                    },
-                    x: {
-                      duration: phase === 'expanding' ? 0.8 : 0.3,
-                      ease: [0.16, 1, 0.3, 1],
-                    },
-                  }}
-                  style={{
-                    transformStyle: 'preserve-3d',
-                  }}
-                  className="relative flex-shrink-0 will-change-transform"
-                >
-                  <ProjectCard
-                    project={project}
-                    onClick={() => handleCardClick(project)}
-                  />
-                </motion.div>
-              );
-            })}
+            {projects.slice(0, NUM_CARDS).map((project, index) => (
+              <EntranceCard
+                key={`entrance-card-${project.id}-${entranceKey}`}
+                index={index}
+                project={project}
+                unfoldProgress={unfoldProgress}
+                ringRotation={ringRotation}
+                entranceTime={entranceTime}
+                onCardClick={handleCardClick}
+              />
+            ))}
           </motion.div>
 
-          {/* Set 2: Duplicate for seamless loop (Fades in during Phase 2/3 so loop is primed) */}
+          {/* Set 2: Duplicate for seamless infinite loop (fades in when row settles) */}
           <motion.div
             animate={{ opacity: phase === 'looping' ? 1 : 0 }}
             transition={{ duration: 0.6 }}
-            className="flex gap-5 sm:gap-6 shrink-0"
+            className="flex gap-6 shrink-0"
             style={{ transformStyle: 'preserve-3d' }}
           >
-            {projects.map((project) => (
+            {projects.slice(0, NUM_CARDS).map((project) => (
               <div key={`set2-${project.id}`} className="relative flex-shrink-0">
                 <ProjectCard
                   project={project}
@@ -575,14 +710,14 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
             ))}
           </motion.div>
 
-          {/* Set 3: Triplicate for ultra-wide screen coverage */}
+          {/* Set 3: Triplicate for ultra-wide monitors */}
           <motion.div
             animate={{ opacity: phase === 'looping' ? 1 : 0 }}
             transition={{ duration: 0.6 }}
-            className="flex gap-5 sm:gap-6 shrink-0"
+            className="flex gap-6 shrink-0"
             style={{ transformStyle: 'preserve-3d' }}
           >
-            {projects.map((project) => (
+            {projects.slice(0, NUM_CARDS).map((project) => (
               <div key={`set3-${project.id}`} className="relative flex-shrink-0">
                 <ProjectCard
                   project={project}
@@ -594,92 +729,42 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
         </motion.div>
       </div>
 
-      {/* Interactive Scrollable Bar Under Cards */}
-      <motion.div
-        animate={{
-          opacity: phase === 'looping' ? 1 : 0.4,
-          y: phase === 'looping' ? 0 : 10,
-        }}
-        transition={{ duration: 0.6 }}
-        className="max-w-5xl mx-auto px-6 mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-between gap-5 select-none"
-      >
-        {/* Left: Active Project Indicator */}
-        <div className="flex items-center gap-2.5 text-xs font-mono">
-          <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" />
-          <span className="text-zinc-500 font-semibold tracking-wider uppercase">
-            Viewing:
-          </span>
-          <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-white font-bold">
-            {projects[activeProjectIndex]?.index ?? '01 / 05'}
-          </span>
-          <span className="text-zinc-300 font-medium tracking-tight truncate max-w-[180px] sm:max-w-none">
-            {projects[activeProjectIndex]?.title}
-          </span>
-        </div>
-
-        {/* Center: The Interactive Scrubber Bar */}
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <span className="text-[11px] font-mono text-zinc-500 hidden sm:inline">01</span>
-
-          <div
-            ref={scrollTrackRef}
-            onPointerDown={handleTrackPointerDown}
-            onPointerMove={handleTrackPointerMove}
-            onPointerUp={handleTrackPointerUp}
-            onPointerCancel={handleTrackPointerUp}
-            className="relative flex-1 sm:w-72 md:w-96 h-8 flex items-center cursor-pointer group touch-none"
-            title="Click or drag to scrub through the project reel"
-          >
-            {/* Background Track Groove */}
-            <div className="relative w-full h-1.5 rounded-full bg-white/10 group-hover:bg-white/20 transition-colors overflow-hidden" />
-
-            {/* 5 Project Tick Marks */}
-            <div className="absolute inset-x-0 h-1.5 flex justify-between items-center pointer-events-none px-0.5">
-              {projects.map((p, idx) => (
-                <div
-                  key={p.id}
-                  className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                    activeProjectIndex === idx
-                      ? 'bg-sky-400 scale-150 shadow-[0_0_8px_#38bdf8]'
-                      : 'bg-white/25'
-                  }`}
-                />
-              ))}
-            </div>
-
-            {/* Draggable Active Thumb Pill */}
-            <motion.div
-              style={{ left: thumbLeft }}
-              className="absolute top-1/2 -translate-y-1/2 w-[20%] h-2.5 rounded-full bg-gradient-to-r from-sky-400 via-indigo-400 to-sky-300 shadow-[0_0_15px_rgba(56,189,248,0.7)] group-hover:h-3 transition-all cursor-grab active:cursor-grabbing pointer-events-none"
-            />
+      {/* Timeline Scrubbing Track */}
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 mt-6">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-2 border-t border-white/5 text-xs font-mono text-zinc-500">
+          <div className="flex items-center gap-3">
+            <span className="text-zinc-400">Navigation Timeline</span>
+            <div className="w-1.5 h-1.5 rounded-full bg-zinc-600" />
+            <span className="text-zinc-500">
+              {phase === 'looping'
+                ? 'Drag timeline to scrub · Click card to inspect'
+                : 'Assembling sequence...'}
+            </span>
           </div>
 
-          <span className="text-[11px] font-mono text-zinc-500 hidden sm:inline">05</span>
-        </div>
+          {/* Timeline Scrubber Bar */}
+          <div
+            ref={scrollTrackRef}
+            onPointerDown={handleScrubberPointerDown}
+            onPointerMove={handleScrubberPointerMove}
+            onPointerUp={handleScrubberPointerUp}
+            onPointerCancel={handleScrubberPointerUp}
+            className={`relative w-full sm:w-72 h-3.5 flex items-center cursor-pointer select-none group touch-none ${
+              phase !== 'looping' ? 'opacity-40 cursor-not-allowed pointer-events-none' : ''
+            }`}
+          >
+            {/* Scrubber Background Bar */}
+            <div className="w-full h-1 bg-white/10 rounded-full group-hover:h-1.5 transition-all overflow-hidden relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-sky-500/20 via-sky-400/30 to-sky-500/20" />
+            </div>
 
-        {/* Right: Quick Jump Buttons */}
-        <div className="flex items-center gap-1">
-          {projects.map((p, idx) => (
-            <button
-              key={p.id}
-              onClick={() => jumpToProject(idx)}
-              className={`px-2 py-1 rounded text-[11px] font-mono transition-all border ${
-                activeProjectIndex === idx
-                  ? 'bg-white/15 text-white border-sky-400/40 font-bold shadow-[0_0_10px_rgba(56,189,248,0.2)]'
-                  : 'bg-white/[0.02] text-zinc-400 border-white/5 hover:text-white hover:bg-white/10'
-              }`}
-              title={`Jump to ${p.title}`}
-            >
-              {p.index.split(' ')[0]}
-            </button>
-          ))}
+            {/* Glowing Draggable Thumb */}
+            <motion.div
+              style={{ left: thumbLeft }}
+              className="absolute top-1/2 -translate-y-1/2 w-8 h-2.5 rounded-full bg-white shadow-[0_0_12px_rgba(255,255,255,0.7)] cursor-grab active:cursor-grabbing border border-sky-300"
+            />
+          </div>
         </div>
-      </motion.div>
-
-      {/* Mobile Hint */}
-      <div className="max-w-7xl mx-auto px-6 mt-4 sm:hidden flex items-center justify-between text-[11px] font-mono text-zinc-500">
-        <span>← Swipe / scrub to explore</span>
-        <span>Tap card for details →</span>
       </div>
     </section>
   );
