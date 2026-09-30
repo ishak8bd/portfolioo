@@ -45,8 +45,8 @@ An Awwwards-caliber digital portfolio engineered for a Senior Frontend Architect
 
 ```bash
 # Clone the repository
-git clone https://github.com/isaaxk/portfo2.git
-cd portfo2
+git clone https://github.com/ishak8bd/portfolio.git
+cd portfolio
 
 # Install dependencies
 npm install
@@ -62,4 +62,4 @@ npm run build
 
 ## 📄 License
 
-MIT © [isaaxk](https://github.com/isaaxk)
+MIT © [ishak8bd](https://github.com/ishak8bd)
