@@ -6,7 +6,6 @@ import {
   Layers,
   MoveHorizontal,
   RotateCcw,
-  RotateCw,
   Sparkles,
 } from 'lucide-react';
 import type { Project } from '../types/project';
@@ -137,14 +136,10 @@ export const RingShowcase: React.FC<RingShowcaseProps> = ({
   const handlePointerDown = (e: React.PointerEvent) => {
     if (e.button !== 0) return;
     isPointerDownRef.current = true;
-    setIsDragging(true);
-    setFlippedCardIndex(null); // Clear flipped card when dragging
     startXRef.current = e.clientX;
     lastXRef.current = e.clientX;
     startAngleRef.current = angle;
     totalDragRef.current = 0;
-
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
@@ -154,14 +149,26 @@ export const RingShowcase: React.FC<RingShowcaseProps> = ({
     totalDragRef.current += Math.abs(currentX - lastXRef.current);
     lastXRef.current = currentX;
 
-    // Direct proportional rotation mapping
-    const sensitivity = dimensions.isMobile ? 0.42 : 0.32;
-    setAngle(startAngleRef.current - dx * sensitivity);
+    if (totalDragRef.current > 6) {
+      if (!isDragging) {
+        setIsDragging(true);
+        setFlippedCardIndex(null);
+        try {
+          (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+        } catch {
+          // Ignored
+        }
+      }
+      // Direct proportional rotation mapping
+      const sensitivity = dimensions.isMobile ? 0.42 : 0.32;
+      setAngle(startAngleRef.current - dx * sensitivity);
+    }
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
     if (!isPointerDownRef.current) return;
     isPointerDownRef.current = false;
+    const wasDragging = isDragging;
     setIsDragging(false);
 
     try {
@@ -170,7 +177,9 @@ export const RingShowcase: React.FC<RingShowcaseProps> = ({
       // Ignored
     }
 
-    snap();
+    if (wasDragging) {
+      snap();
+    }
   };
 
   // Compute active card index
@@ -178,13 +187,20 @@ export const RingShowcase: React.FC<RingShowcaseProps> = ({
   const activeProject = projects[activeNormalizedIndex];
 
   // Card click/tap handler:
-  // - First tap on the front card flips it in 3D to reveal description and technologies.
-  // - Second tap on the card (or clicking Flip Back) flips it back to front.
+  // - Tap on a card flips it to the back to reveal description and technologies.
+  // - Tapping on it again flips it back to the front.
+  // - Tapping on another card brings that card to center and flips it.
   const handleCardClick = (index: number) => {
-    if (totalDragRef.current > 8) return; // Ignore drag release
+    if (totalDragRef.current > 6) return; // Ignore drag release
+
+    // If this card is already flipped, tapping it flips it back to front
+    if (flippedCardIndex === index) {
+      setFlippedCardIndex(null);
+      return;
+    }
 
     if (index === activeNormalizedIndex) {
-      setFlippedCardIndex((prev) => (prev === index ? null : index));
+      setFlippedCardIndex(index);
     } else {
       goTo(index);
       setFlippedCardIndex(null);
@@ -332,7 +348,12 @@ export const RingShowcase: React.FC<RingShowcaseProps> = ({
       {/* 3D Ring View Stage */}
       <div
         ref={containerRef}
-        onClick={() => setFlippedCardIndex(null)}
+        onClick={(e) => {
+          if (totalDragRef.current > 6) return;
+          if (e.target === containerRef.current) {
+            setFlippedCardIndex(null);
+          }
+        }}
         className="relative w-full h-[540px] sm:h-[600px] md:h-[650px] flex items-center justify-center cursor-grab active:cursor-grabbing"
         style={{
           perspective: '1400px',
@@ -447,16 +468,6 @@ export const RingShowcase: React.FC<RingShowcaseProps> = ({
                       >
                         {project.category}
                       </span>
-
-                      {/* Subtle "Tap to Flip" badge on front card */}
-                      <div
-                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/15 text-[10px] font-mono text-zinc-300 transition-opacity duration-300 ${
-                          isFront ? 'opacity-90' : 'opacity-0'
-                        }`}
-                      >
-                        <RotateCw className="w-2.5 h-2.5 text-sky-400" />
-                        <span>Tap to Flip</span>
-                      </div>
                     </div>
 
                     {/* Bottom Content Area: Client & Title ONLY */}
@@ -514,8 +525,8 @@ export const RingShowcase: React.FC<RingShowcaseProps> = ({
                       />
                     </div>
 
-                    {/* Top Bar: Category & Flip Back Button */}
-                    <div className="relative z-10 flex items-center justify-between">
+                    {/* Top Bar: Category */}
+                    <div className="relative z-10 flex items-center justify-between pointer-events-none">
                       <span
                         className="text-[10px] font-mono uppercase tracking-wider px-2.5 py-0.5 rounded-full border backdrop-blur-md"
                         style={{
@@ -526,23 +537,10 @@ export const RingShowcase: React.FC<RingShowcaseProps> = ({
                       >
                         {project.category}
                       </span>
-
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setFlippedCardIndex(null);
-                        }}
-                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-[10px] font-mono text-zinc-300 hover:text-white transition-all cursor-pointer"
-                        title="Flip back to front"
-                      >
-                        <RotateCw className="w-2.5 h-2.5 text-sky-400" />
-                        <span>Flip Back</span>
-                      </button>
                     </div>
 
                     {/* Middle Body: Title, Description, and Technologies */}
-                    <div className="relative z-10 flex flex-col gap-2.5 my-auto">
+                    <div className="relative z-10 flex flex-col gap-2.5 my-auto pointer-events-none">
                       <div>
                         <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 mb-0.5 flex items-center gap-1.5">
                           <span

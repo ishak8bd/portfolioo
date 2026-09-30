@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowUpRight, RotateCw } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import type { Project } from '../types/project';
 
 interface ProjectCardProps {
@@ -18,11 +18,6 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) =>
   const handleViewCaseStudy = (e: React.MouseEvent) => {
     e.stopPropagation();
     onClick();
-  };
-
-  const handleFlipBack = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsFlipped(false);
   };
 
   return (
@@ -76,7 +71,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) =>
             <div className="absolute inset-0 bg-gradient-to-b from-[#090b10]/60 via-transparent to-transparent opacity-80" />
           </div>
 
-          {/* Top Metadata Bar: Category & Tap to Flip indicator */}
+          {/* Top Metadata Bar: Category */}
           <div className="relative z-10 p-4 sm:p-5 flex items-center justify-between pointer-events-none">
             <span
               className="text-[11px] font-mono uppercase tracking-wider px-3 py-1 rounded-full backdrop-blur-md border transition-colors"
@@ -88,16 +83,6 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) =>
             >
               {project.category}
             </span>
-
-            {/* Subtle "Tap to Flip" hint */}
-            <div
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/15 text-[10px] font-mono text-zinc-300 transition-opacity duration-300 ${
-                isHovered ? 'opacity-100' : 'opacity-0 sm:opacity-60'
-              }`}
-            >
-              <RotateCw className="w-2.5 h-2.5 text-sky-400" />
-              <span>Tap to Flip</span>
-            </div>
           </div>
 
           {/* Bottom Content Area: Client & Title ONLY */}
@@ -150,8 +135,8 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) =>
             />
           </div>
 
-          {/* Top Header: Category & Flip Back Button */}
-          <div className="relative z-10 flex items-center justify-between">
+          {/* Top Header: Category */}
+          <div className="relative z-10 flex items-center justify-between pointer-events-none">
             <span
               className="text-[10px] font-mono uppercase tracking-wider px-2.5 py-0.5 rounded-full border backdrop-blur-md"
               style={{
@@ -162,20 +147,10 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) =>
             >
               {project.category}
             </span>
-
-            <button
-              type="button"
-              onClick={handleFlipBack}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-[10px] font-mono text-zinc-300 hover:text-white transition-all cursor-pointer"
-              title="Flip back to front"
-            >
-              <RotateCw className="w-2.5 h-2.5 text-sky-400" />
-              <span>Flip Back</span>
-            </button>
           </div>
 
           {/* Middle Body: Title, Description, and Technologies */}
-          <div className="relative z-10 flex flex-col gap-2.5 my-auto">
+          <div className="relative z-10 flex flex-col gap-2.5 my-auto pointer-events-none">
             <div>
               <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 mb-0.5 flex items-center gap-1.5">
                 <span
