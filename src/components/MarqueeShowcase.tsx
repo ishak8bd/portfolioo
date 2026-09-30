@@ -117,8 +117,8 @@ const EntranceCard: React.FC<EntranceCardProps> = ({
       const ringY = ringZ * Math.sin(tiltRad);
       const ringZProjected = ringZ * Math.cos(tiltRad);
 
-      // Card facing angle on the ring
-      const ringRotY = -currentAngleDeg * 0.55;
+      // Card facing angle on the ring: subtle inward curvature without flipping backwards
+      const ringRotY = Math.sin(angleRad) * -35;
 
       // Perspective depth scaling: nearer cards larger, farther cards smaller
       const depthScaleFactor = 1 + ringZProjected / 1400;

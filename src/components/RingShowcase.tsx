@@ -427,24 +427,15 @@ export const RingShowcase: React.FC<RingShowcaseProps> = ({
 
                   {/* Top Metadata Bar */}
                   <div className="relative z-10 p-4 sm:p-5 flex items-center justify-between pointer-events-none">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-[10px] tracking-widest text-zinc-300 font-bold px-2 py-0.5 rounded bg-black/50 backdrop-blur-md border border-white/10">
-                        {project.index}
-                      </span>
-                      <span
-                        className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full backdrop-blur-md border transition-colors"
-                        style={{
-                          backgroundColor: isFront ? `${project.accentColor}25` : 'rgba(0,0,0,0.5)',
-                          color: isFront ? '#ffffff' : '#a1a1aa',
-                          borderColor: isFront ? `${project.accentColor}80` : 'rgba(255,255,255,0.1)',
-                        }}
-                      >
-                        {project.category}
-                      </span>
-                    </div>
-
-                    <span className="font-mono text-[10px] text-zinc-400 bg-black/50 px-2 py-0.5 rounded backdrop-blur-md border border-white/5">
-                      {project.year}
+                    <span
+                      className="text-[10px] font-mono uppercase tracking-wider px-2.5 py-0.5 rounded-full backdrop-blur-md border transition-colors"
+                      style={{
+                        backgroundColor: isFront ? `${project.accentColor}25` : 'rgba(0,0,0,0.5)',
+                        color: isFront ? '#ffffff' : '#a1a1aa',
+                        borderColor: isFront ? `${project.accentColor}80` : 'rgba(255,255,255,0.1)',
+                      }}
+                    >
+                      {project.category}
                     </span>
                   </div>
 
@@ -479,26 +470,9 @@ export const RingShowcase: React.FC<RingShowcaseProps> = ({
                     </h3>
 
                     {/* Short Tagline */}
-                    <p className="text-xs text-zinc-300/90 line-clamp-2 leading-relaxed mb-3">
+                    <p className="text-xs text-zinc-300/90 line-clamp-2 leading-relaxed">
                       {project.tagline}
                     </p>
-
-                    {/* Tech Stack Mini Tags */}
-                    <div className="flex flex-wrap items-center gap-1.5 pt-3 border-t border-white/10">
-                      {project.stack.slice(0, 3).map((tech) => (
-                        <span
-                          key={tech}
-                          className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-zinc-300 border border-white/5"
-                        >
-                          {tech}
-                        </span>
-                      ))}
-                      {project.stack.length > 3 && (
-                        <span className="text-[10px] font-mono px-1.5 py-0.5 text-zinc-500">
-                          +{project.stack.length - 3}
-                        </span>
-                      )}
-                    </div>
                   </div>
                 </div>
 
@@ -538,12 +512,9 @@ export const RingShowcase: React.FC<RingShowcaseProps> = ({
                   </div>
 
                   {/* Top Bar */}
-                  <div className="relative z-10 flex items-center justify-between pointer-events-none">
-                    <span className="font-mono text-[10px] tracking-widest text-zinc-300 font-bold px-2 py-0.5 rounded bg-black/60 backdrop-blur-md border border-white/10">
-                      {project.index}
-                    </span>
+                  <div className="relative z-10 flex items-center justify-start pointer-events-none">
                     <span
-                      className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full border backdrop-blur-md"
+                      className="text-[10px] font-mono uppercase tracking-wider px-2.5 py-0.5 rounded-full border backdrop-blur-md"
                       style={{
                         backgroundColor: `${project.accentColor}20`,
                         borderColor: `${project.accentColor}50`,
@@ -557,19 +528,17 @@ export const RingShowcase: React.FC<RingShowcaseProps> = ({
                   {/* Center Monogram / Badge & Project Title */}
                   <div className="relative z-10 flex flex-col items-center text-center my-auto px-2 pointer-events-none">
                     <div
-                      className="w-13 h-13 rounded-full flex items-center justify-center mb-2.5 border backdrop-blur-md transition-transform group-hover:scale-110 shadow-lg"
+                      className="w-12 h-12 rounded-full flex items-center justify-center mb-2.5 border backdrop-blur-md transition-transform group-hover:scale-110 shadow-lg"
                       style={{
                         borderColor: `${project.accentColor}60`,
                         backgroundColor: `${project.accentColor}15`,
                         boxShadow: `0 0 25px -5px ${project.accentColor}40`,
                       }}
                     >
-                      <span
-                        className="font-mono font-bold text-xs tracking-wider"
+                      <Sparkles
+                        className="w-5 h-5"
                         style={{ color: project.accentColor }}
-                      >
-                        {project.index.split(' ')[0]}
-                      </span>
+                      />
                     </div>
 
                     <h4 className="text-base font-extrabold text-white mb-1 tracking-tight line-clamp-1">
@@ -586,13 +555,10 @@ export const RingShowcase: React.FC<RingShowcaseProps> = ({
                     </div>
                   </div>
 
-                  {/* Bottom Client & Year */}
-                  <div className="relative z-10 flex items-center justify-between pt-2.5 border-t border-white/10 pointer-events-none">
-                    <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest truncate max-w-[120px]">
+                  {/* Bottom Client */}
+                  <div className="relative z-10 flex items-center justify-start pt-2.5 border-t border-white/10 pointer-events-none">
+                    <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest truncate max-w-[200px]">
                       {project.client}
-                    </span>
-                    <span className="font-mono text-[10px] text-zinc-400 bg-black/40 px-2 py-0.5 rounded border border-white/5">
-                      {project.year}
                     </span>
                   </div>
                 </div>
@@ -635,8 +601,7 @@ export const RingShowcase: React.FC<RingShowcaseProps> = ({
                     transform: isActive ? 'scale(1.2)' : 'scale(1)',
                   }}
                 />
-                <span className="font-semibold">{proj.index.split(' ')[0]}</span>
-                <span className="hidden md:inline text-zinc-400">{proj.title}</span>
+                <span className="text-zinc-300 font-medium">{proj.title}</span>
               </button>
             );
           })}
