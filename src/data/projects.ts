@@ -9,7 +9,7 @@ export const PROJECTS: Project[] = [
     category: 'Deep RL & Dynamic Systems',
     year: '2026',
     client: 'Université Saad Dahleb × Purdue (Dr. Zengxiang Lei)',
-    image: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1600&auto=format&fit=crop',
+    image: '/projects/ride-hailing.jpg',
     accentColor: '#38bdf8',
     stack: ['Python', 'Go', 'Kafka', 'WebSockets', 'TD3', 'SAC', 'PPO', 'React', 'Mapbox GL', 'Docker'],
     repoUrl: 'https://github.com/isaaxk',
