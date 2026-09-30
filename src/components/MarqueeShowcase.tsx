@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { motion, useAnimationFrame, useMotionValue, useTransform } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Pause, Play, MoveHorizontal } from 'lucide-react';
+import { motion, useAnimationFrame, useMotionValue, useTransform, useInView } from 'framer-motion';
+import { ChevronLeft, ChevronRight, Pause, Play, MoveHorizontal, RotateCcw } from 'lucide-react';
 import type { Project } from '../types/project';
 import { ProjectCard } from './ProjectCard';
 
@@ -8,6 +8,8 @@ interface MarqueeShowcaseProps {
   projects: Project[];
   onSelectProject: (project: Project) => void;
 }
+
+type EntrancePhase = 'idle' | 'spinning' | 'expanding' | 'looping';
 
 // Robust mathematical wrap within [min, max)
 function wrapRange(min: number, max: number, v: number): number {
@@ -20,10 +22,17 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
   projects,
   onSelectProject,
 }) => {
+  const sectionRef = useRef<HTMLElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const firstSetRef = useRef<HTMLDivElement>(null);
   const scrollTrackRef = useRef<HTMLDivElement>(null);
+
+  // In-view detection to trigger entrance
+  const isInView = useInView(sectionRef, { once: true, margin: '-60px 0px' });
+  const [phase, setPhase] = useState<EntrancePhase>('idle');
+  const hasTriggeredEntrance = useRef(false);
+  const phaseTimersRef = useRef<number[]>([]);
 
   // Motion values and state
   const x = useMotionValue(0);
@@ -47,6 +56,57 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
   // Auto-scroll configuration
   const baseSpeed = 46; // pixels per second
   const direction = -1; // -1 for scrolling left, 1 for scrolling right
+
+  // Clear pending timers
+  const clearTimers = useCallback(() => {
+    phaseTimersRef.current.forEach((t) => clearTimeout(t));
+    phaseTimersRef.current = [];
+  }, []);
+
+  // Launch the 3-layer coordinated entrance
+  const startEntranceSequence = useCallback(() => {
+    clearTimers();
+    setPhase('spinning');
+
+    // Align initial track position so Card 2 (middle) is exactly centered in viewport
+    if (singleSetWidth > 0 && containerRef.current) {
+      const cardPitch = 404; // 380px card + 24px gap
+      const cardHalfWidth = 190;
+      const centerOffset = containerRef.current.offsetWidth / 2 - (2 * cardPitch + cardHalfWidth);
+      x.set(wrapRange(-singleSetWidth, 0, centerOffset));
+    }
+
+    // Phase 1 (0.0s - 2.2s): Parent plate spins 360 while cards pop in
+    const t1 = window.setTimeout(() => {
+      // Phase 2 (2.2s - 3.05s): Parent scales up to 1.0 AND children expand x slots together
+      setPhase('expanding');
+    }, 2200);
+
+    const t2 = window.setTimeout(() => {
+      // Phase 3 (3.05s+): Marquee loop takes over seamlessly
+      setPhase('looping');
+    }, 3050);
+
+    phaseTimersRef.current = [t1, t2];
+  }, [clearTimers, singleSetWidth, x]);
+
+  // Trigger when scrolled into view
+  useEffect(() => {
+    if (isInView && !hasTriggeredEntrance.current) {
+      hasTriggeredEntrance.current = true;
+      startEntranceSequence();
+    }
+  }, [isInView, startEntranceSequence]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => clearTimers();
+  }, [clearTimers]);
+
+  // Replay entrance
+  const replayEntrance = () => {
+    startEntranceSequence();
+  };
 
   // Derived motion value for the scrollbar thumb position (range: 0% to 80%)
   const thumbLeft = useTransform(x, (val) => {
@@ -82,8 +142,9 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
     };
   }, [measureWidth, projects]);
 
-  // Frame animation loop
+  // Frame animation loop (active once in looping phase or idle)
   useAnimationFrame((_, delta) => {
+    if (phase !== 'looping') return;
     if (singleSetWidth <= 0) return;
 
     const currentX = x.get();
@@ -103,7 +164,7 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
 
     // Continuous auto-scroll when not hovered and not wheeling/scrubbing
     if (!isHovered && !isUserActive) {
-      const deltaSeconds = Math.min(delta / 1000, 0.1); // clamp delta
+      const deltaSeconds = Math.min(delta / 1000, 0.1);
       const autoMove = direction * baseSpeed * deltaSeconds;
       nextX += autoMove;
     }
@@ -112,7 +173,7 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
     const wrapped = wrapRange(-singleSetWidth, 0, nextX);
     x.set(wrapped);
 
-    // Update active project index efficiently (only triggers state when changed)
+    // Update active project index efficiently
     const currentRatio = (((-wrapped % singleSetWidth) + singleSetWidth) % singleSetWidth) / singleSetWidth;
     const computedIndex = Math.min(Math.floor(currentRatio * projects.length), projects.length - 1);
     if (computedIndex !== lastActiveIndexRef.current) {
@@ -123,6 +184,7 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
 
   // Pointer drag event handlers for main track
   const handlePointerDown = (e: React.PointerEvent) => {
+    if (phase !== 'looping') return;
     if (e.button !== 0) return;
 
     isPointerDownRef.current = true;
@@ -235,6 +297,7 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
 
   // Mouse wheel horizontal translation
   const handleWheel = (e: React.WheelEvent) => {
+    if (phase !== 'looping') return;
     const rawDelta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
     if (Math.abs(rawDelta) < 1) return;
 
@@ -257,18 +320,19 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
 
   // Card click with drag threshold check
   const handleCardClick = (project: Project) => {
-    if (totalDragDistanceRef.current > 6) {
-      return;
-    }
+    if (totalDragDistanceRef.current > 6) return;
     onSelectProject(project);
   };
 
   return (
-    <section className="relative w-full py-16 md:py-24 overflow-hidden border-y border-white/5 bg-[#060709]">
-      {/* Background Radial Light Accent (Cyan/Sky palette alignment) */}
+    <section
+      ref={sectionRef}
+      className="relative w-full py-16 md:py-24 overflow-hidden border-y border-white/5 bg-[#060709]"
+    >
+      {/* Background Radial Light Accent (Subtle Cyan/Sky ambiance) */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[400px] bg-sky-500/[0.04] blur-[120px] rounded-full pointer-events-none" />
 
-      {/* Section Header with Scroll-Triggered Reveal */}
+      {/* Section Header */}
       <motion.div
         initial={{ opacity: 0, y: 35, filter: 'blur(5px)' }}
         whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
@@ -285,14 +349,21 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
             Engineered Works
           </h2>
           <p className="mt-2 text-sm sm:text-base text-zinc-400 max-w-xl">
-            Hover to pause. Drag, scroll or scrub the bar below to navigate. Click any card for the architectural breakdown.
+            {phase === 'spinning' || phase === 'expanding'
+              ? 'Synchronized 3D cluster assembly resolving into continuous marquee line...'
+              : 'Hover to pause. Drag, scroll or scrub the bar below to navigate. Click any card for the architectural breakdown.'}
           </p>
         </div>
 
         {/* Status & Control Indicators */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/10 text-xs font-mono text-zinc-400">
-            {isHovered || isDragging || isUserActive ? (
+            {phase !== 'looping' ? (
+              <>
+                <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping" />
+                <span className="text-sky-300">Assembling</span>
+              </>
+            ) : isHovered || isDragging || isUserActive ? (
               <>
                 <Pause className="w-3 h-3 text-amber-400" />
                 <span className="text-amber-300">Paused</span>
@@ -304,6 +375,17 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
               </>
             )}
           </div>
+
+          {phase === 'looping' && (
+            <button
+              onClick={replayEntrance}
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 text-xs font-mono text-zinc-300 hover:text-white transition-all"
+              title="Replay coordinated 3D entrance"
+            >
+              <RotateCcw className="w-3 h-3 text-sky-400" />
+              <span>Replay Entrance</span>
+            </button>
+          )}
 
           <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/10 text-xs font-mono text-zinc-400">
             <MoveHorizontal className="w-3.5 h-3.5 text-zinc-500" />
@@ -330,7 +412,7 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
         </div>
       </motion.div>
 
-      {/* Marquee Viewport Container with 3D Perspective Context */}
+      {/* Marquee Viewport with 3D Perspective Context */}
       <div
         ref={containerRef}
         onMouseEnter={() => setIsHovered(true)}
@@ -355,131 +437,117 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
           style={{ x, transformStyle: 'preserve-3d' }}
           className="flex gap-5 sm:gap-6 will-change-transform py-4"
         >
-          {/* Set 1: Measured set */}
-          <div ref={firstSetRef} className="flex gap-5 sm:gap-6 shrink-0" style={{ transformStyle: 'preserve-3d' }}>
-            {projects.map((project, index) => (
-              <motion.div
-                key={`set1-${project.id}`}
-                initial={{
-                  rotateY: -75,
-                  x: -45,
-                  z: -180,
-                  scale: 0.88,
-                  opacity: 0,
-                }}
-                whileInView={{
-                  rotateY: 0,
-                  x: 0,
-                  z: 0,
-                  scale: 1,
-                  opacity: 1,
-                }}
-                viewport={{ once: true, margin: '-40px' }}
-                transition={{
-                  duration: 0.85,
-                  delay: (index % 5) * 0.08,
-                  ease: [0.16, 1, 0.3, 1],
-                }}
-                style={{
-                  transformStyle: 'preserve-3d',
-                  backfaceVisibility: 'hidden',
-                }}
-                className="relative flex-shrink-0 will-change-transform"
-              >
-                <ProjectCard
-                  project={project}
-                  onClick={() => handleCardClick(project)}
-                />
-              </motion.div>
-            ))}
-          </div>
+          {/* Set 1: SHARED ROTATING GROUP (The 5 cards rotating together as one plate) */}
+          <motion.div
+            ref={firstSetRef}
+            animate={{
+              rotateY: phase === 'spinning' ? [0, 360] : 0,
+              scale: phase === 'spinning' ? 0.58 : 1.0,
+            }}
+            transition={{
+              rotateY: {
+                duration: 2.2,
+                ease: 'easeInOut',
+              },
+              scale: {
+                duration: phase === 'expanding' ? 0.85 : 0.35,
+                ease: [0.16, 1, 0.3, 1],
+              },
+            }}
+            style={{
+              transformStyle: 'preserve-3d',
+              transformOrigin: 'center center',
+            }}
+            className="flex gap-5 sm:gap-6 shrink-0 will-change-transform"
+          >
+            {projects.map((project, index) => {
+              const k = index - 2; // -2, -1, 0, 1, 2
+              // In Phase 1, cards sit in a compact cluster on the plate.
+              // In Phase 2, x animates from compactOffset -> 0 (its natural marquee slot) simultaneously with scale!
+              const compactOffset = k * -140;
 
-          {/* Set 2: Duplicate for seamless loop */}
-          <div className="flex gap-5 sm:gap-6 shrink-0" style={{ transformStyle: 'preserve-3d' }}>
-            {projects.map((project, index) => (
-              <motion.div
-                key={`set2-${project.id}`}
-                initial={{
-                  rotateY: -75,
-                  x: -45,
-                  z: -180,
-                  scale: 0.88,
-                  opacity: 0,
-                }}
-                whileInView={{
-                  rotateY: 0,
-                  x: 0,
-                  z: 0,
-                  scale: 1,
-                  opacity: 1,
-                }}
-                viewport={{ once: true, margin: '-40px' }}
-                transition={{
-                  duration: 0.85,
-                  delay: (index % 5) * 0.08,
-                  ease: [0.16, 1, 0.3, 1],
-                }}
-                style={{
-                  transformStyle: 'preserve-3d',
-                  backfaceVisibility: 'hidden',
-                }}
-                className="relative flex-shrink-0 will-change-transform"
-              >
+              return (
+                <motion.div
+                  key={`set1-${project.id}`}
+                  initial={{ scale: 0.4, opacity: 0 }}
+                  animate={{
+                    scale: phase === 'idle' ? 0.4 : 1,
+                    opacity: phase === 'idle' ? 0 : 1,
+                    x: phase === 'spinning' ? compactOffset : 0,
+                  }}
+                  transition={{
+                    scale: {
+                      delay: phase === 'spinning' ? index * 0.16 : 0,
+                      duration: 0.5,
+                      ease: [0.16, 1, 0.3, 1],
+                    },
+                    opacity: {
+                      delay: phase === 'spinning' ? index * 0.16 : 0,
+                      duration: 0.4,
+                    },
+                    x: {
+                      duration: phase === 'expanding' ? 0.85 : 0.3,
+                      ease: [0.16, 1, 0.3, 1],
+                    },
+                  }}
+                  style={{
+                    transformStyle: 'preserve-3d',
+                    backfaceVisibility: 'hidden',
+                  }}
+                  className="relative flex-shrink-0 will-change-transform"
+                >
+                  <ProjectCard
+                    project={project}
+                    onClick={() => handleCardClick(project)}
+                  />
+                </motion.div>
+              );
+            })}
+          </motion.div>
+
+          {/* Set 2: Duplicate for seamless loop (Fades in during Phase 2/3 so loop is primed) */}
+          <motion.div
+            animate={{ opacity: phase === 'looping' ? 1 : 0 }}
+            transition={{ duration: 0.6 }}
+            className="flex gap-5 sm:gap-6 shrink-0"
+            style={{ transformStyle: 'preserve-3d' }}
+          >
+            {projects.map((project) => (
+              <div key={`set2-${project.id}`} className="relative flex-shrink-0">
                 <ProjectCard
                   project={project}
                   onClick={() => handleCardClick(project)}
                 />
-              </motion.div>
+              </div>
             ))}
-          </div>
+          </motion.div>
 
           {/* Set 3: Triplicate for ultra-wide screen coverage */}
-          <div className="flex gap-5 sm:gap-6 shrink-0" style={{ transformStyle: 'preserve-3d' }}>
-            {projects.map((project, index) => (
-              <motion.div
-                key={`set3-${project.id}`}
-                initial={{
-                  rotateY: -75,
-                  x: -45,
-                  z: -180,
-                  scale: 0.88,
-                  opacity: 0,
-                }}
-                whileInView={{
-                  rotateY: 0,
-                  x: 0,
-                  z: 0,
-                  scale: 1,
-                  opacity: 1,
-                }}
-                viewport={{ once: true, margin: '-40px' }}
-                transition={{
-                  duration: 0.85,
-                  delay: (index % 5) * 0.08,
-                  ease: [0.16, 1, 0.3, 1],
-                }}
-                style={{
-                  transformStyle: 'preserve-3d',
-                  backfaceVisibility: 'hidden',
-                }}
-                className="relative flex-shrink-0 will-change-transform"
-              >
+          <motion.div
+            animate={{ opacity: phase === 'looping' ? 1 : 0 }}
+            transition={{ duration: 0.6 }}
+            className="flex gap-5 sm:gap-6 shrink-0"
+            style={{ transformStyle: 'preserve-3d' }}
+          >
+            {projects.map((project) => (
+              <div key={`set3-${project.id}`} className="relative flex-shrink-0">
                 <ProjectCard
                   project={project}
                   onClick={() => handleCardClick(project)}
                 />
-              </motion.div>
+              </div>
             ))}
-          </div>
+          </motion.div>
         </motion.div>
       </div>
 
       {/* Interactive Scrollable Bar Under Cards */}
       <motion.div
-        initial={{ opacity: 0, y: 30, filter: 'blur(4px)' }}
-        whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-        viewport={{ once: true, margin: '-40px' }}
-        transition={{ duration: 0.7, delay: 0.25, ease: [0.21, 0.47, 0.32, 0.98] }}
+        animate={{
+          opacity: phase === 'looping' ? 1 : 0.4,
+          y: phase === 'looping' ? 0 : 10,
+        }}
+        transition={{ duration: 0.6 }}
         className="max-w-5xl mx-auto px-6 mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-between gap-5 select-none"
       >
         {/* Left: Active Project Indicator */}
