@@ -31,6 +31,7 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
   // In-view detection to trigger entrance
   const isInView = useInView(sectionRef, { once: true, margin: '-60px 0px' });
   const [phase, setPhase] = useState<EntrancePhase>('idle');
+  const [entranceKey, setEntranceKey] = useState(0);
   const hasTriggeredEntrance = useRef(false);
   const phaseTimersRef = useRef<number[]>([]);
 
@@ -63,9 +64,10 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
     phaseTimersRef.current = [];
   }, []);
 
-  // Launch the 3-layer coordinated entrance
+  // Launch the 3-phase flat spinning-plate entrance
   const startEntranceSequence = useCallback(() => {
     clearTimers();
+    setEntranceKey((k) => k + 1);
     setPhase('spinning');
 
     // Align initial track position so Card 2 (middle) is exactly centered in viewport
@@ -76,16 +78,16 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
       x.set(wrapRange(-singleSetWidth, 0, centerOffset));
     }
 
-    // Phase 1 (0.0s - 2.2s): Parent plate spins 360 while cards pop in
+    // Phase 1 (0.0s - 2.0s): Parent plate spins 360 over 2.0s while cards pop in
     const t1 = window.setTimeout(() => {
-      // Phase 2 (2.2s - 3.05s): Parent scales up to 1.0 AND children expand x slots together
+      // Phase 2 (2.0s - 2.8s): Parent scales 0.58 -> 1.0 AND cards expand from compactOffset -> 0
       setPhase('expanding');
-    }, 2200);
+    }, 2000);
 
     const t2 = window.setTimeout(() => {
-      // Phase 3 (3.05s+): Marquee loop takes over seamlessly
+      // Phase 3 (2.8s+): Marquee loop takes over seamlessly at the exact current position
       setPhase('looping');
-    }, 3050);
+    }, 2800);
 
     phaseTimersRef.current = [t1, t2];
   }, [clearTimers, singleSetWidth, x]);
@@ -437,8 +439,9 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
           style={{ x, transformStyle: 'preserve-3d' }}
           className="flex gap-5 sm:gap-6 will-change-transform py-4"
         >
-          {/* Set 1: SHARED ROTATING GROUP (The 5 cards rotating together as one plate) */}
+          {/* Set 1: SHARED ROTATING GROUP (The 5 cards rotating together on one flat plate) */}
           <motion.div
+            key={`rotating-plate-${entranceKey}`}
             ref={firstSetRef}
             animate={{
               rotateY: phase === 'spinning' ? [0, 360] : 0,
@@ -446,11 +449,11 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
             }}
             transition={{
               rotateY: {
-                duration: 2.2,
+                duration: 2.0,
                 ease: 'easeInOut',
               },
               scale: {
-                duration: phase === 'expanding' ? 0.85 : 0.35,
+                duration: phase === 'expanding' ? 0.8 : 0.35,
                 ease: [0.16, 1, 0.3, 1],
               },
             }}
@@ -461,14 +464,14 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
             className="flex gap-5 sm:gap-6 shrink-0 will-change-transform"
           >
             {projects.map((project, index) => {
-              const k = index - 2; // -2, -1, 0, 1, 2
+              const k = index - 2; // -2, -1, 0, 1, 2 relative to middle card (Card 2)
               // In Phase 1, cards sit in a compact cluster on the plate.
               // In Phase 2, x animates from compactOffset -> 0 (its natural marquee slot) simultaneously with scale!
               const compactOffset = k * -140;
 
               return (
                 <motion.div
-                  key={`set1-${project.id}`}
+                  key={`set1-${project.id}-${entranceKey}`}
                   initial={{ scale: 0.4, opacity: 0 }}
                   animate={{
                     scale: phase === 'idle' ? 0.4 : 1,
@@ -477,22 +480,21 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
                   }}
                   transition={{
                     scale: {
-                      delay: phase === 'spinning' ? index * 0.16 : 0,
+                      delay: phase === 'spinning' ? index * 0.18 : 0,
                       duration: 0.5,
                       ease: [0.16, 1, 0.3, 1],
                     },
                     opacity: {
-                      delay: phase === 'spinning' ? index * 0.16 : 0,
+                      delay: phase === 'spinning' ? index * 0.18 : 0,
                       duration: 0.4,
                     },
                     x: {
-                      duration: phase === 'expanding' ? 0.85 : 0.3,
+                      duration: phase === 'expanding' ? 0.8 : 0.3,
                       ease: [0.16, 1, 0.3, 1],
                     },
                   }}
                   style={{
                     transformStyle: 'preserve-3d',
-                    backfaceVisibility: 'hidden',
                   }}
                   className="relative flex-shrink-0 will-change-transform"
                 >
