@@ -1,7 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import {
-  ChevronLeft,
-  ChevronRight,
   Pause,
   Play,
   ArrowUpRight,
@@ -320,29 +318,6 @@ export const RingShowcase: React.FC<RingShowcaseProps> = ({
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
       >
-        {/* Floating Left & Right Navigation Chevrons */}
-        <div className="absolute inset-x-4 sm:inset-x-8 top-1/2 -translate-y-1/2 z-30 flex items-center justify-between pointer-events-none">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              prevCard();
-            }}
-            className="p-3 sm:p-4 rounded-full bg-[#0e1017]/80 hover:bg-[#151923] border border-white/10 hover:border-sky-500/50 text-white backdrop-blur-xl shadow-2xl transition-all duration-300 pointer-events-auto cursor-pointer group active:scale-95"
-            aria-label="Previous Project"
-          >
-            <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 text-zinc-300 group-hover:text-sky-400 transition-colors" />
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              nextCard();
-            }}
-            className="p-3 sm:p-4 rounded-full bg-[#0e1017]/80 hover:bg-[#151923] border border-white/10 hover:border-sky-500/50 text-white backdrop-blur-xl shadow-2xl transition-all duration-300 pointer-events-auto cursor-pointer group active:scale-95"
-            aria-label="Next Project"
-          >
-            <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-zinc-300 group-hover:text-sky-400 transition-colors" />
-          </button>
-        </div>
 
         {/* Ambient Stage Floor Reflection Horizon */}
         <div
