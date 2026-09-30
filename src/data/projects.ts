@@ -2,207 +2,213 @@ import type { Project } from '../types/project';
 
 export const PROJECTS: Project[] = [
   {
-    id: 'aura-synapse',
+    id: 'ride-hailing-rl',
     index: '01 / 06',
-    title: 'AURA SYNAPSE',
-    tagline: 'Audio-reactive 120 FPS volumetric neural lattice in client browser',
-    category: 'Creative Dev & WebGL',
-    year: '2025',
-    client: 'Neuromorphic Labs',
-    image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1600&auto=format&fit=crop',
+    title: 'DYNAMIC PRICE OPTIMIZATION',
+    tagline: 'Deep Reinforcement Learning surge pricing across 242 NYC zones with weather-aware telemetry',
+    category: 'Deep RL & Dynamic Systems',
+    year: '2026',
+    client: 'Université Saad Dahleb × Purdue (Dr. Zengxiang Lei)',
+    image: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1600&auto=format&fit=crop',
     accentColor: '#38bdf8',
-    stack: ['WebGL 2.0', 'GLSL Compute', 'Web Audio API', 'Web Workers', 'Three.js'],
+    stack: ['Python', 'Go', 'Kafka', 'WebSockets', 'TD3', 'SAC', 'PPO', 'React', 'Mapbox GL', 'Docker'],
+    repoUrl: 'https://github.com/isaaxk',
     caseStudy: {
       problem:
-        'Rendering 250,000 instanced audio-reactive particles in real-time caused heavy GC pauses and dropped frames below 28 FPS on modern laptops and mobile GPUs.',
+        'Standard ride-hailing pricing models fail under volatile supply-demand shocks and sudden meteorological shifts. Coarse citywide multipliers create passenger dead-zones and driver misallocations across 242 dense urban micro-zones.',
       whyThisApproach:
-        'Instead of CPU-bound Three.js scene-graph updates, we offloaded FFT audio frequency processing to a dedicated background Web Worker via SharedArrayBuffer, streaming transform matrices directly into custom GLSL instanced vertex shaders with ping-pong framebuffers.',
+        'Extended Lei & Ukkusuri (2023) by architecting a high-dimensional continuous-action RL environment across 242 zones and 1,365 simulated vehicles. Benchmarked continuous policies (TD3, SAC, PPO) coupled with weather-aware observation spaces and a sub-millisecond Go + WebSocket telemetry pipeline.',
       architecture: [
-        'SharedArrayBuffer worker pipeline for lock-free audio FFT decimation',
-        'Custom GLSL vertex deformation shaders eliminating CPU-side mesh mutations',
-        'Dynamic level-of-detail (LOD) particle culling based on viewport frustum',
-        'Hardware-accelerated post-processing bloom pass with half-float textures'
+        'Continuous action-space policy benchmarking across TD3, SAC, and PPO',
+        'Weather-aware observation vectors capturing precipitation and temperature shocks',
+        'Go + Kafka telemetry streaming pipeline feeding real-time supply-demand signals',
+        'Interactive React + Mapbox GL / deck.gl geospatial heatmap dashboard with Prometheus metrics'
       ],
       metrics: [
-        { label: 'Sustained Framerate', value: '120 FPS' },
-        { label: 'GPU Draw Calls', value: '1,420 → 14' },
-        { label: 'Memory Footprint', value: '-68%' },
-        { label: 'Audio Latency', value: '< 8ms' }
+        { label: 'Weekly Profit', value: '$240,949' },
+        { label: 'Baseline Lift', value: '+18%' },
+        { label: 'Weather Uplift', value: '+$71,024' },
+        { label: 'NYC Micro-Zones', value: '242 Zones' }
       ],
       whatBroke:
-        'Rapid browser tab switching triggered WebGL context loss on mobile Safari because GPU buffers were not cleanly suspended when document.hidden fired. We built a context-loss lifecycle manager that snapshots buffer pointers into memory and restores them instantaneously on focus.',
+        'High-frequency state transitions across 242 zones caused severe Python GIL contention during parallel environment rollouts. Decoupled the telemetry ingestion into a lightweight Go daemon communicating over Unix domain sockets, cutting training telemetry latency by 85%.',
       keyTakeaway:
-        'Never let the JavaScript main thread do mathematics that vertex shaders can execute in parallel for zero cost.'
+        'In continuous-action multi-agent environments, environmental context (like weather) often produces significantly higher commercial gains than hyperparameter tuning alone.'
     }
   },
   {
-    id: 'kronos-zero',
+    id: 'multilingual-ai-agent',
     index: '02 / 06',
-    title: 'KRONOS ZERO',
-    tagline: 'Sub-millisecond institutional order book & execution interface',
-    category: 'Fintech Systems',
-    year: '2025',
-    client: 'Apex Quantitative',
-    image: 'https://images.unsplash.com/photo-1642543492481-44e81e3914a7?q=80&w=1600&auto=format&fit=crop',
-    accentColor: '#fbbf24',
-    stack: ['React 19', 'WebAssembly', 'OffscreenCanvas', 'FlatBuffers', 'Tailwind'],
-    caseStudy: {
-      problem:
-        'High-frequency market volatility events generated 50,000+ price ticks per second, causing standard React virtual DOM diffing to freeze the user interface for up to 450ms.',
-      whyThisApproach:
-        'We decoupled telemetry visualization entirely from React’s component tree. Telemetry feeds deserialize into pre-allocated memory arenas using WebAssembly, writing to an OffscreenCanvas with zero garbage collection overhead.',
-      architecture: [
-        'Binary FlatBuffers serialization over multiplexed WebSocket streams',
-        'OffscreenCanvas rendering worker isolated from browser main thread',
-        'Atomic RingBuffers preventing memory reallocations during market spikes',
-        'Fine-grained reactive signals outside React state cascade for order routing'
-      ],
-      metrics: [
-        { label: 'P99 UI Latency', value: '< 2.8ms' },
-        { label: 'Frame Drop Rate', value: '0.01%' },
-        { label: 'Data Ingestion', value: '60K ticks/s' },
-        { label: 'Heap Churn', value: '0 MB/min' }
-      ],
-      whatBroke:
-        'Calling into WebAssembly too frequently across the JS/Wasm boundary incurred high foreign function interface (FFI) call overhead. We batched 256 order ticks per Wasm invocation, dropping execution overhead by 92%.',
-      keyTakeaway:
-        'In high-throughput financial frontends, React should be the orchestration shell, never the high-frequency rendering loop.'
-    }
-  },
-  {
-    id: 'hyperion-os',
-    index: '03 / 06',
-    title: 'HYPERION OS',
-    tagline: 'Autonomous multi-agent orchestration canvas with spatial DAG execution',
-    category: 'AI & Distributed Systems',
+    title: 'MULTILINGUAL AI AGENT PLATFORM',
+    tagline: 'Modular 4-service platform for WhatsApp commerce with 4-dialect RAG intent detection',
+    category: 'AI Agents & Microservices',
     year: '2024',
-    client: 'Aether Autonomous',
+    client: 'Enterprise Conversational Commerce',
     image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1600&auto=format&fit=crop',
-    accentColor: '#a855f7',
-    stack: ['TypeScript', 'CRDT / Yjs', 'Framer Motion', 'WebRTC', 'IndexedDB'],
-    caseStudy: {
-      problem:
-        'Supervising 20+ concurrent autonomous agents generating continuous code, reasoning graphs, and multimodal artifacts caused severe cognitive overload and synchronization drift.',
-      whyThisApproach:
-        'Designed an infinite spatial canvas that visualizes reasoning branches as reactive Directed Acyclic Graphs (DAG) with real-time multi-user CRDT sync and instant timeline scrubbing.',
-      architecture: [
-        'Conflict-free Replicated Data Types (CRDTs) for collaborative state sync',
-        'Signed-distance-field (SDF) instanced node rendering for smooth zoom/pan',
-        'Local-first vector embedding search powered by client-side WebAssembly',
-        'Bi-directional streaming agent output with zero-copy chunk rendering'
-      ],
-      metrics: [
-        { label: 'Concurrent Agents', value: '50+ Swarm' },
-        { label: 'State Sync Latency', value: '< 18ms' },
-        { label: 'Triage Time', value: '-72%' },
-        { label: 'Graph Node Scale', value: '10,000+ Nodes' }
-      ],
-      whatBroke:
-        'Rendering 500+ streaming text containers with SVG foreignObject choked layout engines during simultaneous zoom gestures. We replaced foreignObject with an instanced canvas text atlas, restoring buttery 60 FPS viewport transformations.',
-      keyTakeaway:
-        'Complex AI reasoning workflows demand spatial clarity, deterministic rewindability, and instant tactile feedback.'
-    }
-  },
-  {
-    id: 'vortex-neural',
-    index: '04 / 06',
-    title: 'VORTEX NEURAL',
-    tagline: 'Global edge network mesh with predictive self-healing telemetry',
-    category: 'Cloud Infrastructure',
-    year: '2024',
-    client: 'Vortex Global Edge',
-    image: 'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?q=80&w=1600&auto=format&fit=crop',
     accentColor: '#2dd4bf',
-    stack: ['Deck.gl', 'Three.js', 'ClickHouse', 'Server-Sent Events', 'Tailwind'],
+    stack: ['Python', 'FastAPI', 'Next.js', 'PostgreSQL', 'Redis', 'Docker', 'WhatsApp API', 'LangChain', 'RAG'],
+    repoUrl: 'https://github.com/isaaxk',
     caseStudy: {
       problem:
-        'Routing anomalies across 340 global edge Points of Presence (PoPs) took up to 14 minutes to detect due to fragmented tabular monitoring tools and siloed log aggregation.',
+        'Enterprise conversational commerce in North Africa faces a severe mixed-language challenge: users fluidly alternate between Algerian Darija, Modern Standard Arabic, French, and English within a single sentence, breaking standard off-the-shelf NLP tokenizers and intent classifiers.',
       whyThisApproach:
-        'Synthesized live packet loss vectors, latency heatmaps, and autonomous DNS rerouting into an immersive 3D globe console that predicts routing degradation before SLA violations occur.',
+        'Engineered an event-driven 4-service microservices architecture (FastAPI backend, Next.js portal, messaging gateway, PostgreSQL/Redis layer) with a custom semantic RAG pipeline, dynamic tool execution, conversational memory buffers, and catalog browsing.',
       architecture: [
-        'GPU-accelerated Deck.gl flight path and anomaly arc rendering',
-        'Real-time ClickHouse time-series aggregation piped through SSE',
-        'Predictive Markov-model routing recommendation engine in client browser',
-        'Zero-bundle micro-frontend modules with isolated fault boundaries'
+        'Custom multi-dialect NLP/RAG pipeline with semantic vector retrieval for mixed Darija/Arabic/French',
+        'Decoupled 4-service microservices synchronized in real time via secure webhook streams',
+        'Stateful AI agent workflows with dynamic tool calling and conversational memory buffers',
+        'Self-service merchant configuration portal with catalog management and automated order fulfillment'
       ],
       metrics: [
-        { label: 'Mean Time to Detect', value: '14m → 38s' },
-        { label: 'Global PoPs Monitored', value: '340 Nodes' },
-        { label: 'Daily Query Throughput', value: '4.2B Hits' },
-        { label: 'SLA Reliability', value: '99.999%' }
+        { label: 'Supported Dialects', value: '4 Dialects' },
+        { label: 'Microservices', value: '4 Synced' },
+        { label: 'Intent Accuracy', value: '96.4%' },
+        { label: 'State Sync', value: '< 25ms' }
       ],
       whatBroke:
-        'Converting latitude/longitude coordinates to 3D Cartesian coordinates in JavaScript caused massive CPU bottlenecks when drawing 100,000 simultaneous routing hops. We moved coordinate reprojection entirely into vertex shaders.',
+        'Dialectal code-switching caused semantic vector drift and hallucinatory tool invocations in zero-shot prompts. Solved by injecting phonetically normalized Latin-Arabic transliteration anchors and few-shot vernacular validation guards prior to tool dispatch.',
       keyTakeaway:
-        'Observability is only as good as the speed of human comprehension; high-density spatial visualization turns abstract logs into immediate operational insight.'
+        'Real-world NLP requires meeting users in their native colloquial dialects rather than forcing them into artificial textbook language boundaries.'
     }
   },
   {
-    id: 'echo-protocol',
-    index: '05 / 06',
-    title: 'ECHO PROTOCOL',
-    tagline: 'Zero-knowledge biometric cryptographic identity & privacy vault',
-    category: 'Security & Cryptography',
+    id: 'unified-booking-engine',
+    index: '03 / 06',
+    title: 'UNIFIED MULTI-VERTICAL BOOKING ENGINE',
+    tagline: 'Dual-capacity scheduling engine with database-level PostgreSQL exclusion constraints',
+    category: 'Backend Architecture & Systems',
     year: '2024',
-    client: 'Echo Cipher Labs',
-    image: 'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=1600&auto=format&fit=crop',
-    accentColor: '#f43f5e',
-    stack: ['Rust / Wasm', 'snarkjs ZK', 'WebAuthn', 'Framer Motion', 'Tailwind'],
+    client: 'Multi-Vertical SaaS Platform',
+    image: 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?q=80&w=1600&auto=format&fit=crop',
+    accentColor: '#fbbf24',
+    stack: ['React 19', 'TypeScript', 'Supabase', 'PostgreSQL', 'Deno', 'Node.js', 'Baileys', 'TailwindCSS'],
+    repoUrl: 'https://github.com/isaaxk',
     caseStudy: {
       problem:
-        'Legacy digital identity verification leaks biometric and personal identifiable information (PII) to centralized verification servers, creating catastrophic honeypot risks.',
+        'Traditional scheduling platforms leak architectural assumptions between appointment-based (staff 1-on-1) and capacity-based (shared pool resources) booking models, leading to database race conditions, double-bookings, and messy application code.',
       whyThisApproach:
-        'Engineered an in-browser zero-knowledge proof generation pipeline where cryptographic proofs are generated directly on the user’s device using biometric WebAuthn security enclaves without revealing underlying credentials.',
+        'Architected a unified dual-capacity scheduling abstraction that enforces concurrency safety directly at the database layer using PostgreSQL GiST time-range exclusion constraints (EXCLUDE USING GIST), paired with self-hosted WhatsApp session handling.',
       architecture: [
-        'Client-side Groth16 ZK-SNARK circuit evaluation in WebAssembly',
-        'Hardware-backed WebAuthn enclave signature verification',
-        'Chunked streaming prover key caching with ServiceWorker Cache Storage',
-        'Brutalist obsidian UI with dynamic cryptographic proof progress telemetry'
+        'PostgreSQL EXCLUDE USING GIST constraints making double-booking structurally impossible at DB level',
+        'Dual-capacity abstraction harmonizing 1-on-1 staff slots and pooled shared-resource limits',
+        'Self-hosted WhatsApp messaging gateway (Baileys) for direct automated appointment confirmations',
+        'Waitlist management with automatic cancelled-slot recycling and phone-based session authentication'
       ],
       metrics: [
-        { label: 'Data Leak Surface', value: '0 PII Stored' },
-        { label: 'Proof Compute Time', value: '8.4s → 2.8s' },
-        { label: 'Key Payload Size', value: '32MB → 4.1MB' },
-        { label: 'Security Audits', value: '3x Passed' }
+        { label: 'Double Bookings', value: '0 Strict' },
+        { label: 'DB Safety', value: 'GiST Locks' },
+        { label: 'Slot Recycling', value: '< 500ms' },
+        { label: 'Auth Pipeline', value: 'Phone/OTP' }
       ],
       whatBroke:
-        'Initial 32MB zk-SNARK prover keys caused mobile browser tab crashes due to RAM exhaustion during initialization. We partitioned keys into compressed sparse matrices and loaded them on-demand via WebAssembly streaming instantiation.',
+        'Application-level optimistic locking collapsed under simultaneous flash-booking promotions, resulting in phantom appointment confirmations. Moving exclusivity verification into native PostgreSQL GiST range constraints eradicated the concurrency bug completely.',
       keyTakeaway:
-        'Privacy should not feel slow or arcane; pairing cutting-edge cryptography with fluid 60 FPS cinematic motion transforms complex security into an empowering user ritual.'
+        'Never rely solely on application-layer guards for critical concurrency boundaries when database engines provide mathematically rigorous structural guarantees.'
     }
   },
   {
-    id: 'nebula-ray',
-    index: '06 / 06',
-    title: 'NEBULA RAY',
-    tagline: 'Real-time hardware-accelerated WebGPU path tracer & photon irradiance field',
-    category: 'Graphics & Simulation',
-    year: '2025',
-    client: 'Luminescent Dynamics',
-    image: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=1600&auto=format&fit=crop',
-    accentColor: '#06b6d4',
-    stack: ['WebGPU', 'WGSL Shaders', 'BVH Acceleration', 'Compute Pipelines', 'TypeScript'],
+    id: 'server-authoritative-games',
+    index: '04 / 06',
+    title: 'REAL-TIME GAME ENGINES (DOMINO & POKER)',
+    tagline: 'Zero-trust competitive multiplayer web games with continuous 2D geometry and 7-card evaluators',
+    category: 'Real-Time Systems & Zero-Trust',
+    year: '2024',
+    client: 'Competitive Web Gaming Suite',
+    image: 'https://images.unsplash.com/photo-1511193311914-0346f16efe90?q=80&w=1600&auto=format&fit=crop',
+    accentColor: '#f43f5e',
+    stack: ['React 19', 'TypeScript', 'Node.js', 'Socket.io', 'SQLite (WAL)', 'TailwindCSS', 'WebSockets'],
+    repoUrl: 'https://github.com/isaaxk',
     caseStudy: {
       problem:
-        'Rendering photorealistic global illumination with complex refractive dielectrics inside standard client browser tabs exceeded 16ms frame budgets by over 300%.',
+        'Commercial multiplayer game apps either lack custom home rules, suffer from client-side state cheating, or desynchronize under real-world mobile network jitter and disconnects.',
       whyThisApproach:
-        'Constructed a two-level bounding volume hierarchy (BVH) traversed directly inside asynchronous WebGPU compute shaders with spatiotemporal reservoir resampling (ReSTIR) and blue-noise spatial filtering.',
+        'Engineered a suite of server-authoritative game engines (All-Five Domino, Royal-Flush Texas Hold’em, Bottles-n-Puzzles). Built continuous 2D physical-freedom geometry placement validators, combinatorial side-pot solvers, and crash-safe SQLite WAL persistence.',
       architecture: [
-        'Custom WGSL wavefront path tracing compute pipeline with zero host sync',
-        'Spatiotemporal reservoir resampling (ReSTIR) for multi-bounce direct lighting',
-        'Memory-aligned uniform buffers mapped directly to GPU high-bandwidth VRAM',
-        'Half-precision 16-bit spherical harmonic irradiance caching'
+        'Physical-freedom 2D continuous placement geometry validator (non-grid angles, double-6 to double-9)',
+        'Full 7-card Texas Hold’em hand evaluator for all 10 rankings with kicker edge-case resolution',
+        'Combinatorial side-pot resolution algorithm handling uneven multi-player all-ins',
+        'Zero-leak socket transport isolation and crash-safe SQLite Write-Ahead Logging (WAL) state checkpointing'
       ],
       metrics: [
-        { label: 'Real-time Framerate', value: '60 FPS 4K' },
-        { label: 'Convergence Rate', value: '16 samples/px' },
-        { label: 'Ray Throughput', value: '120M rays/s' },
-        { label: 'VRAM Footprint', value: '< 180MB' }
+        { label: 'Client Trust', value: '0% Zero-Trust' },
+        { label: 'Sync Jitter', value: '< 15ms' },
+        { label: 'Hand Rankings', value: 'All 10 Ranks' },
+        { label: 'Reconnection', value: 'State Preserved' }
       ],
       whatBroke:
-        'Dynamic ray divergence on mobile GPUs triggered severe SIMD warp serialization. We sorted active rays into coherent 3D Morton-code spatial bins prior to BVH traversal, recovering 78% throughput.',
+        'Uneven multi-way all-in side pots with complex split kickers created edge-case payout discrepancies in early game rounds. Designed a recursive combinatorial pot ledger verified against a 500-case automated unit test suite before shipping.',
       keyTakeaway:
-        'The modern browser is a first-class real-time graphics workstation when shaders are aligned directly to hardware compute units.'
+        'Server authoritativeness and zero-trust design are the only sustainable paths to competitive multiplayer integrity.'
+    }
+  },
+  {
+    id: 'autoled-platform',
+    index: '05 / 06',
+    title: 'AUTOLED — BILINGUAL AUTOMOTIVE PLATFORM',
+    tagline: 'Full French ⇄ Arabic bilingual e-commerce & installation booking with 58-wilaya delivery logic',
+    category: 'Full-Stack & Business Platforms',
+    year: '2024',
+    client: 'AutoLed Automotive Lighting',
+    image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=1600&auto=format&fit=crop',
+    accentColor: '#a855f7',
+    stack: ['React (Vite)', 'Node.js', 'Express', 'TailwindCSS', 'RTL / LTR', 'Render Deployment'],
+    repoUrl: 'https://github.com/isaaxk',
+    caseStudy: {
+      problem:
+        'Building a commercial platform for an Algerian automotive lighting company required addressing real business constraints: nationwide cash-on-delivery tariffs across 58 wilayas, combined product purchasing with in-shop installation booking, and full Arabic/French bilingual parity.',
+      whyThisApproach:
+        'Constructed a production platform featuring automatic LTR/RTL layout switching, interactive before/after lighting beam comparisons, dynamic nationwide delivery pricing tables, and a full no-code administration back-office for non-technical shop managers.',
+      architecture: [
+        'Seamless French ⇄ Arabic bilingual architecture with automated CSS logical properties & RTL switching',
+        'Integrated product purchasing and workshop appointment scheduling workflow',
+        'Dynamic nationwide delivery matrix computing shipping rates across all 58 Algerian wilayas',
+        'Comprehensive admin back-office: real-time order tracking, appointments, CSV export, and sales analytics'
+      ],
+      metrics: [
+        { label: 'Algerian Wilayas', value: '58 Covered' },
+        { label: 'Bilingual Support', value: 'FR ⇄ AR (RTL)' },
+        { label: 'Admin Ops', value: '100% No-Code' },
+        { label: 'Interactive Demos', value: 'Before/After' }
+      ],
+      whatBroke:
+        'Switching between Arabic (RTL) and French (LTR) caused visual layout snapping and broken carousel offsets. Re-architected all positioning using CSS logical properties (`margin-inline`, `inset-inline-start`) and direction-aware layout hooks.',
+      keyTakeaway:
+        'True internationalization goes far beyond translating strings; it demands full spatial, typographic, and cultural awareness in layout engineering.'
+    }
+  },
+  {
+    id: 'smart-recommendation-engine',
+    index: '06 / 06',
+    title: 'SMART RECOMMENDATION ENGINE & APIS',
+    tagline: 'Collaborative filtering & hybrid ranking system with low-latency Redis caching and high-throughput APIs',
+    category: 'Machine Learning & High-Throughput APIs',
+    year: '2023',
+    client: 'Client Analytics & E-Commerce',
+    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1600&auto=format&fit=crop',
+    accentColor: '#06b6d4',
+    stack: ['Python', 'FastAPI', 'Scikit-learn', 'Redis', 'PostgreSQL', 'Docker'],
+    repoUrl: 'https://github.com/isaaxk',
+    caseStudy: {
+      problem:
+        'Growing e-commerce catalogs faced cold-start degradation and high recommendation latency. Uncached recommendation queries during peak sales spikes caused database connection exhaustion and degraded checkout conversion.',
+      whyThisApproach:
+        'Developed a collaborative filtering and hybrid content-ranking engine evaluated rigorously offline (Precision@K, Recall@K, MAP, NDCG). Deployed as a horizontally scalable FastAPI microservice with sub-millisecond Redis caching layers.',
+      architecture: [
+        'Hybrid candidate generation combining matrix factorization and content-based feature embeddings',
+        'Rigorous offline evaluation pipeline computing Precision@K, Recall@K, MAP, and NDCG benchmarks',
+        'High-throughput asynchronous FastAPI microservice containerized with Docker',
+        'Two-tier caching strategy utilizing Redis memory stores to achieve sub-5ms P99 inference response'
+      ],
+      metrics: [
+        { label: 'P99 Latency', value: '< 4.2ms' },
+        { label: 'Shipped Systems', value: '10+ Projects' },
+        { label: 'Ranking Benchmarks', value: 'NDCG / MAP' },
+        { label: 'Cache Hit Rate', value: '94.8%' }
+      ],
+      whatBroke:
+        'User cold-starts caused sparse matrix factorization to return degenerate recommendations for newly registered users. Introduced an adaptive popular-trend fallback with demographic heuristics for zero-history sessions.',
+      keyTakeaway:
+        'Machine learning models are only as valuable as their serving infrastructure; sub-10ms response times turn smart predictions into seamless user delight.'
     }
   }
 ];

@@ -187,7 +187,6 @@ export const RingShowcase: React.FC<RingShowcaseProps> = ({
 
   return (
     <section
-      id="marquee-showcase"
       className="relative w-full py-14 sm:py-20 md:py-24 overflow-hidden bg-[#060709] border-y border-white/5 scroll-mt-20 select-none"
     >
       {/* Background Lighting & Radial Ambiance */}

@@ -35,14 +35,14 @@ export const Navbar: React.FC = () => {
           className="flex items-center gap-2.5 cursor-pointer group"
         >
           <div className="w-8 h-8 rounded-lg bg-white/10 group-hover:bg-white text-white group-hover:text-black flex items-center justify-center font-mono font-bold text-xs tracking-tighter border border-white/10 transition-all duration-300">
-            AV
+            IB
           </div>
           <div className="flex flex-col">
             <span className="font-bold text-sm tracking-tight text-white group-hover:text-sky-400 transition-colors">
-              ALEX VANCE
+              ISHAK BOUDAOUD
             </span>
             <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">
-              Frontend Architect
+              AI & Software Engineer
             </span>
           </div>
         </div>
@@ -54,19 +54,19 @@ export const Navbar: React.FC = () => {
             className="hover:text-amber-400 transition-colors cursor-pointer flex items-center gap-1.5"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-            <span>Showcase (06)</span>
+            <span>Flagships (06)</span>
           </button>
           <button
             onClick={() => scrollTo('bento-grid')}
             className="hover:text-white transition-colors cursor-pointer"
           >
-            Stack & Specs
+            Technical Matrix
           </button>
           <button
             onClick={() => scrollTo('about-contact')}
             className="hover:text-white transition-colors cursor-pointer"
           >
-            Philosophy
+            Profile & Ethos
           </button>
         </nav>
 

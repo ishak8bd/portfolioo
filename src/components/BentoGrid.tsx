@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import type { Variants } from 'framer-motion';
-import { Cpu, Activity, ShieldCheck, Gauge, Binary } from 'lucide-react';
+import { Cpu, Activity, ShieldCheck, Gauge, Binary, Network, Layers, GitBranch } from 'lucide-react';
 
 const cardVariant: Variants = {
   hidden: { opacity: 0, y: 35, scale: 0.98, filter: 'blur(4px)' },
@@ -31,19 +31,19 @@ export const BentoGrid: React.FC = () => {
       >
         <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-sky-400 mb-2">
           <Activity className="w-3.5 h-3.5" />
-          <span>System Matrix • Overview</span>
+          <span>System Matrix • Technical Depth</span>
         </div>
         <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white">
-          Skills, Stack & Philosophy
+          Skills, Architecture & Depth
         </h2>
-        <p className="mt-2 text-sm sm:text-base text-zinc-400 max-w-xl">
-          Engineered for extreme performance, predictable memory models, and bespoke visual fidelity.
+        <p className="mt-2 text-sm sm:text-base text-zinc-400 max-w-2xl">
+          Strong mathematical and engineering fundamentals paired with practical experience shipping production AI, distributed microservices, and real-time engines.
         </p>
       </motion.div>
 
-      {/* Bento Grid Layout with Staggered Scroll-Triggered Reveals */}
+      {/* Bento Grid Layout */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-        {/* Card 1: Primary Engineering Stack (Wide 2-col) */}
+        {/* Card 1: Core Technology Stack (Wide 2-col) */}
         <motion.div
           custom={0}
           initial="hidden"
@@ -61,28 +61,34 @@ export const BentoGrid: React.FC = () => {
                 <Cpu className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white">Core Technology Stack</h3>
-                <span className="text-xs text-zinc-400 font-mono">Modern Frontend & Graphics</span>
+                <h3 className="text-lg font-bold text-white">Full-Pipeline Technology Stack</h3>
+                <span className="text-xs text-zinc-400 font-mono">Data Science, ML & Production Backend</span>
               </div>
             </div>
 
             <p className="text-sm text-zinc-300 leading-relaxed mb-6">
-              Bridging modern component state with bare-metal web graphics. Zero hesitation in dropping down to GLSL shaders, WebAssembly modules, or Web Workers when the main thread needs protection.
+              Owning the complete path from raw data and reinforcement learning formulations to production REST APIs, distributed message queues, and responsive client dashboards.
             </p>
           </div>
 
           <div className="flex flex-wrap gap-2 pt-4 border-t border-white/5">
             {[
+              'Python',
+              'PyTorch',
+              'FastAPI',
+              'Docker',
+              'Kafka',
+              'Go',
               'React 19',
               'TypeScript',
-              'WebGL / Three.js',
-              'GLSL Shaders',
-              'WebAssembly (Rust)',
-              'Framer Motion',
-              'Tailwind CSS',
-              'OffscreenCanvas',
-              'Web Workers',
-              'FlatBuffers',
+              'PostgreSQL',
+              'Redis',
+              'LangChain',
+              'Vector DBs (RAG)',
+              'TD3 / SAC / PPO',
+              'WebSockets',
+              'Supabase',
+              'Mapbox GL'
             ].map((tech) => (
               <span
                 key={tech}
@@ -94,7 +100,7 @@ export const BentoGrid: React.FC = () => {
           </div>
         </motion.div>
 
-        {/* Card 2: Performance Philosophy (1-col) */}
+        {/* Card 2: Deep RL & Dynamic Pricing (1-col) */}
         <motion.div
           custom={1}
           initial="hidden"
@@ -110,20 +116,20 @@ export const BentoGrid: React.FC = () => {
             <div className="p-2.5 w-fit rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 mb-4">
               <Gauge className="w-5 h-5" />
             </div>
-            <h3 className="text-lg font-bold text-white mb-1">Sub-16ms Frame Budget</h3>
-            <span className="text-xs text-zinc-400 font-mono">Uncompromising Fluidity</span>
+            <h3 className="text-lg font-bold text-white mb-1">Deep RL & Pricing</h3>
+            <span className="text-xs text-zinc-400 font-mono">Lei & Ukkusuri (2023) Extended</span>
             <p className="mt-3 text-sm text-zinc-300 leading-relaxed">
-              Every transition, gesture, and telemetry feed is profiled for 0 jank. If a layout thrash occurs, we re-architect.
+              Continuous-action surge pricing across 242 NYC zones and 1,365 simulated vehicles. Benchmarked TD3, SAC, and PPO with weather-aware state spaces.
             </p>
           </div>
 
           <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between text-xs font-mono text-zinc-400">
-            <span>Target: 120 FPS</span>
-            <span className="text-emerald-400 font-bold">100% Achieved</span>
+            <span>Weekly Profit:</span>
+            <span className="text-amber-400 font-bold">$240,949 (+18%)</span>
           </div>
         </motion.div>
 
-        {/* Card 3: Zero Memory Leaks & GC Discipline (1-col) */}
+        {/* Card 3: Concurrency & Data Integrity (1-col) */}
         <motion.div
           custom={2}
           initial="hidden"
@@ -139,16 +145,16 @@ export const BentoGrid: React.FC = () => {
             <div className="p-2.5 w-fit rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-4">
               <ShieldCheck className="w-5 h-5" />
             </div>
-            <h3 className="text-lg font-bold text-white mb-1">Memory Discipline</h3>
-            <span className="text-xs text-zinc-400 font-mono">Zero Heap Degradation</span>
+            <h3 className="text-lg font-bold text-white mb-1">Data Integrity & Concurrency</h3>
+            <span className="text-xs text-zinc-400 font-mono">PostgreSQL GiST & Zero-Trust</span>
             <p className="mt-3 text-sm text-zinc-300 leading-relaxed">
-              Strict object pool reuse and buffer disposal. Applications built to run continuously in trading rooms and operations centers for months without restart.
+              PostgreSQL time-range exclusion constraints (EXCLUDE USING GIST) making double-booking structurally impossible. Zero-leak server-authoritative socket isolation for gaming.
             </p>
           </div>
 
           <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between text-xs font-mono text-zinc-400">
-            <span>GC Pauses:</span>
-            <span className="text-emerald-400 font-bold">&lt; 1.2ms</span>
+            <span>Double Bookings:</span>
+            <span className="text-emerald-400 font-bold">0 Structural</span>
           </div>
         </motion.div>
 
@@ -163,10 +169,10 @@ export const BentoGrid: React.FC = () => {
           className="p-6 rounded-2xl bg-[#0b0d13] border border-white/10 flex flex-col justify-center"
         >
           <div className="text-3xl sm:text-4xl font-black text-sky-400 font-mono tracking-tight">
-            &lt; 3.2ms
+            10+ Shipped
           </div>
-          <div className="mt-1 text-xs text-zinc-300 font-bold">P99 Render Latency</div>
-          <div className="mt-0.5 text-xs text-zinc-500 font-mono">Institutional trading orderbook</div>
+          <div className="mt-1 text-xs text-zinc-300 font-bold">End-to-End AI & Software Projects</div>
+          <div className="mt-0.5 text-xs text-zinc-500 font-mono">Chatbots, SaaS, APIs & Recommenders</div>
         </motion.div>
 
         {/* Card 5: Verified Metric Stat 2 (1-col) */}
@@ -180,10 +186,10 @@ export const BentoGrid: React.FC = () => {
           className="p-6 rounded-2xl bg-[#0b0d13] border border-white/10 flex flex-col justify-center"
         >
           <div className="text-3xl sm:text-4xl font-black text-amber-400 font-mono tracking-tight">
-            1,420 → 14
+            +$71,024
           </div>
-          <div className="mt-1 text-xs text-zinc-300 font-bold">GPU Draw Calls Reduction</div>
-          <div className="mt-0.5 text-xs text-zinc-500 font-mono">Instanced vertex shader passes</div>
+          <div className="mt-1 text-xs text-zinc-300 font-bold">Weekly Weather Lift (+41.8%)</div>
+          <div className="mt-0.5 text-xs text-zinc-500 font-mono">576,805 simulated passengers/wk</div>
         </motion.div>
 
         {/* Card 6: Architectural Philosophy (Wide 2-col) */}
@@ -201,18 +207,75 @@ export const BentoGrid: React.FC = () => {
               <Binary className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base sm:text-lg font-bold text-white">Cinematic Systems Thinking</h3>
-              <span className="text-xs text-zinc-400 font-mono">Design Meets Systems Engineering</span>
+              <h3 className="text-base sm:text-lg font-bold text-white">Problems Beyond the Textbook</h3>
+              <span className="text-xs text-zinc-400 font-mono">Turning Research into Production Reality</span>
             </div>
           </div>
 
           <p className="text-sm text-zinc-300 leading-relaxed">
-            "Animation without performance is an annoyance. Performance without aesthetics is sterile. The sweet spot is cinema-grade motion backed by brutalist systems architecture."
+            "I go looking for problems without a clean textbook answer: reinforcement learning agents competing across hundreds of micro-zones, language models that have to understand a mix of Algerian Darija, Arabic, French, and English — that's exactly where high-leverage engineering lives."
           </p>
 
           <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-mono text-zinc-500">
-            <span>Philosophy</span>
-            <span className="text-purple-400">Zero compromises</span>
+            <span>Engineering Degree: Data Science Track</span>
+            <span className="text-purple-400 font-semibold">Saad Dahleb University Blida 1</span>
+          </div>
+        </motion.div>
+
+        {/* Card 7: Technical Depth Breakdown (Full-width / 4-col) */}
+        <motion.div
+          custom={6}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-50px' }}
+          variants={cardVariant}
+          className="md:col-span-3 lg:col-span-4 p-6 sm:p-8 rounded-2xl bg-[#090b10] border border-white/10 relative overflow-hidden"
+        >
+          <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-sky-400 mb-4">
+            <Network className="w-4 h-4" />
+            <span>Core Engineering Domains & Techniques</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-1.5">
+              <div className="flex items-center gap-2 text-xs font-bold text-sky-400 font-mono">
+                <GitBranch className="w-3.5 h-3.5" />
+                <span>Distributed Systems</span>
+              </div>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                4-service microservices (FastAPI + Next.js + gateway + Postgres/Redis) kept synchronized via real-time webhooks.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-1.5">
+              <div className="flex items-center gap-2 text-xs font-bold text-teal-400 font-mono">
+                <Layers className="w-3.5 h-3.5" />
+                <span>NLP & Multi-Dialect RAG</span>
+              </div>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Semantic vector retrieval across Algerian Darija, Arabic, French, and English with phonetic normalization.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-1.5">
+              <div className="flex items-center gap-2 text-xs font-bold text-amber-400 font-mono">
+                <Activity className="w-3.5 h-3.5" />
+                <span>Real-Time Streaming</span>
+              </div>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Kafka + Go + WebSockets streaming pipelines with sub-second synchronization and live Mapbox telemetry.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-1.5">
+              <div className="flex items-center gap-2 text-xs font-bold text-rose-400 font-mono">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>Fault Tolerance & WAL</span>
+              </div>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Crash-safe SQLite WAL checkpointing with session reconnection; zero game or transaction loss on disconnects.
+              </p>
+            </div>
           </div>
         </motion.div>
       </div>

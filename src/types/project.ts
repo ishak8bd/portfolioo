@@ -19,5 +19,6 @@ export interface Project {
   accentColor: string;
   stack: string[];
   liveUrl?: string;
+  repoUrl?: string;
   caseStudy: ProjectCaseStudy;
 }

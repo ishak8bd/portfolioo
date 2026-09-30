@@ -155,7 +155,7 @@ export const Hero: React.FC = () => {
             <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
           </span>
           <span className="text-xs font-mono tracking-wider text-zinc-300">
-            Available for Select Architecture & Creative Engineering
+            📍 Blida, Algeria · Open to interesting problems
           </span>
         </motion.div>
 
@@ -166,10 +166,10 @@ export const Hero: React.FC = () => {
           transition={{ duration: 0.8, delay: 0.15, ease: [0.21, 0.47, 0.32, 0.98] }}
           className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[1.05] mb-6 text-white"
         >
-          ARCHITECTING <br />
-          <span className="text-gradient-silver">HIGH-VELOCITY</span> <br />
-          <span className="bg-gradient-to-r from-sky-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
-            DIGITAL SYSTEMS
+          SHIPPING AI & <br />
+          <span className="text-gradient-silver">DISTRIBUTED SOFTWARE</span> <br />
+          <span className="bg-gradient-to-r from-sky-400 via-teal-300 to-indigo-400 bg-clip-text text-transparent">
+            DATA TO DEPLOYMENT
           </span>
         </motion.h1>
 
@@ -178,10 +178,27 @@ export const Hero: React.FC = () => {
           initial={{ opacity: 0, y: 25, filter: 'blur(6px)' }}
           animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           transition={{ duration: 0.8, delay: 0.25, ease: [0.21, 0.47, 0.32, 0.98] }}
-          className="max-w-2xl text-base sm:text-lg md:text-xl text-zinc-400 font-light leading-relaxed mb-10"
+          className="max-w-2xl text-base sm:text-lg md:text-xl text-zinc-300 font-light leading-relaxed mb-6"
         >
-          Senior Frontend Engineer fusing sub-millisecond execution, custom GPU shaders, and uncompromising cinematic art direction into production web applications.
+          Final-year CS Engineering student (Data Science track) shipping production AI systems. From continuous Deep Reinforcement Learning agents and multi-dialect RAG pipelines to high-concurrency real-time engines.
         </motion.p>
+
+        {/* Core Tech Stack Badges */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.3 }}
+          className="flex flex-wrap items-center justify-center gap-2 mb-10 max-w-xl"
+        >
+          {['Python', 'PyTorch', 'React 19', 'FastAPI', 'Docker', 'Kafka', 'Go', 'PostgreSQL'].map((tech) => (
+            <span
+              key={tech}
+              className="text-xs font-mono px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-zinc-400 backdrop-blur-md"
+            >
+              {tech}
+            </span>
+          ))}
+        </motion.div>
 
         {/* Action Buttons */}
         <motion.div
@@ -195,7 +212,7 @@ export const Hero: React.FC = () => {
             className="flex items-center gap-2.5 px-7 py-3.5 rounded-xl bg-white text-black font-semibold text-sm hover:bg-zinc-200 transition-all shadow-[0_0_30px_rgba(255,255,255,0.25)] hover:scale-[1.02] active:scale-[0.98]"
           >
             <Flame className="w-4 h-4 text-amber-500 fill-amber-500" />
-            <span>Explore Flagship Works</span>
+            <span>Explore Flagship Works (06)</span>
           </button>
 
           <button
@@ -203,7 +220,7 @@ export const Hero: React.FC = () => {
             className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-white border border-white/10 text-sm font-medium transition-all backdrop-blur-md"
           >
             <Terminal className="w-4 h-4 text-sky-400" />
-            <span>Core Architecture</span>
+            <span>Technical Matrix</span>
           </button>
         </motion.div>
       </div>

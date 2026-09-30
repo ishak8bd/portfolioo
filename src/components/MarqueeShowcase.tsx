@@ -511,7 +511,6 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
   return (
     <section
       ref={sectionRef}
-      id="marquee-showcase"
       className="relative w-full py-16 md:py-24 overflow-hidden border-y border-white/5 bg-[#060709] scroll-mt-20 select-none"
     >
       {/* Background Ambient Glow */}
