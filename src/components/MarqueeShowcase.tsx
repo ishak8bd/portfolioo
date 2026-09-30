@@ -35,9 +35,13 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
   const hasTriggeredEntrance = useRef(false);
   const phaseTimersRef = useRef<number[]>([]);
 
+  // Mathematical constants for 380px card + 24px gap
+  const CARD_PITCH = 404;
+  const SET_STRIDE = projects.length * CARD_PITCH; // 2020px for 5 cards
+
   // Motion values and state
   const x = useMotionValue(0);
-  const [singleSetWidth, setSingleSetWidth] = useState(0);
+  const [singleSetWidth, setSingleSetWidth] = useState(SET_STRIDE);
   const [isHovered, setIsHovered] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isUserActive, setIsUserActive] = useState(false);
@@ -72,9 +76,8 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
 
     // Align initial track position so Card 2 (middle) is exactly centered in viewport
     if (singleSetWidth > 0 && containerRef.current) {
-      const cardPitch = 404; // 380px card + 24px gap
       const cardHalfWidth = 190;
-      const centerOffset = containerRef.current.offsetWidth / 2 - (2 * cardPitch + cardHalfWidth);
+      const centerOffset = containerRef.current.offsetWidth / 2 - (2 * CARD_PITCH + cardHalfWidth);
       x.set(wrapRange(-singleSetWidth, 0, centerOffset));
     }
 
@@ -91,6 +94,15 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
 
     phaseTimersRef.current = [t1, t2];
   }, [clearTimers, singleSetWidth, x]);
+
+  // Initial alignment: Center Card 2 immediately on mount
+  useEffect(() => {
+    if (containerRef.current) {
+      const cardHalfWidth = 190;
+      const centerOffset = containerRef.current.offsetWidth / 2 - (2 * CARD_PITCH + cardHalfWidth);
+      x.set(wrapRange(-SET_STRIDE, 0, centerOffset));
+    }
+  }, [containerRef, x, SET_STRIDE]);
 
   // Trigger when scrolled into view
   useEffect(() => {
@@ -118,12 +130,14 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
     return `${ratio * 80}%`;
   });
 
-  // Measure the width of one single set of cards
+  // Measure the width of one single set of cards + 24px gap between sets
   const measureWidth = useCallback(() => {
     if (firstSetRef.current) {
       const width = firstSetRef.current.offsetWidth;
       if (width > 0) {
-        setSingleSetWidth(width);
+        // In flex layout with gap-6 (24px), the distance between card 0 of Set 1
+        // and card 0 of Set 2 is set width + 24px inter-set gap = 2020px.
+        setSingleSetWidth(width + 24);
       }
     }
   }, []);
@@ -378,16 +392,19 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
             )}
           </div>
 
-          {phase === 'looping' && (
-            <button
-              onClick={replayEntrance}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 text-xs font-mono text-zinc-300 hover:text-white transition-all"
-              title="Replay coordinated 3D entrance"
-            >
-              <RotateCcw className="w-3 h-3 text-sky-400" />
-              <span>Replay Entrance</span>
-            </button>
-          )}
+          <button
+            onClick={replayEntrance}
+            disabled={phase === 'spinning' || phase === 'expanding'}
+            className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-mono transition-all ${
+              phase === 'spinning' || phase === 'expanding'
+                ? 'bg-white/[0.01] border-white/5 text-zinc-600 cursor-not-allowed'
+                : 'bg-white/[0.03] hover:bg-white/[0.08] border-white/10 text-zinc-300 hover:text-white'
+            }`}
+            title="Replay coordinated 3D entrance"
+          >
+            <RotateCcw className={`w-3 h-3 ${phase === 'spinning' ? 'animate-spin text-sky-400' : 'text-sky-400'}`} />
+            <span>{phase === 'looping' ? 'Replay Entrance' : 'Assembling...'}</span>
+          </button>
 
           <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/10 text-xs font-mono text-zinc-400">
             <MoveHorizontal className="w-3.5 h-3.5 text-zinc-500" />
@@ -465,9 +482,11 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
           >
             {projects.map((project, index) => {
               const k = index - 2; // -2, -1, 0, 1, 2 relative to middle card (Card 2)
-              // In Phase 1, cards sit in a compact cluster on the plate.
-              // In Phase 2, x animates from compactOffset -> 0 (its natural marquee slot) simultaneously with scale!
-              const compactOffset = k * -140;
+              // Natural flex distance from Card 2 is k * 404px.
+              // Spacing cards by 184px in Phase 1 creates a natural 54% fanned deck where each card's
+              // visual identity is preserved, then expands outward into full 404px marquee slots:
+              // compactOffset = k * (184 - 404) = k * -220px!
+              const compactOffset = k * -220;
 
               return (
                 <motion.div
@@ -480,13 +499,13 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
                   }}
                   transition={{
                     scale: {
-                      delay: phase === 'spinning' ? index * 0.18 : 0,
-                      duration: 0.5,
+                      delay: phase === 'spinning' ? index * 0.28 : 0,
+                      duration: 0.45,
                       ease: [0.16, 1, 0.3, 1],
                     },
                     opacity: {
-                      delay: phase === 'spinning' ? index * 0.18 : 0,
-                      duration: 0.4,
+                      delay: phase === 'spinning' ? index * 0.28 : 0,
+                      duration: 0.38,
                     },
                     x: {
                       duration: phase === 'expanding' ? 0.8 : 0.3,
