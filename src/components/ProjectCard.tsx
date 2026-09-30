@@ -16,7 +16,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) =>
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="group relative flex-shrink-0 w-[290px] sm:w-[350px] md:w-[380px] h-[400px] sm:h-[440px] md:h-[460px] rounded-2xl overflow-hidden cursor-pointer select-none bg-[#0e1017] border border-white/10 transition-shadow duration-500"
+      className="group relative flex-shrink-0 w-[260px] sm:w-[300px] md:w-[330px] h-[360px] sm:h-[400px] md:h-[420px] rounded-2xl overflow-hidden cursor-pointer select-none bg-[#0e1017] border border-white/10 transition-shadow duration-500"
       style={{
         boxShadow: isHovered
           ? `0 20px 45px -12px ${project.accentColor}30, 0 0 0 1px ${project.accentColor}50`

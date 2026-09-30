@@ -30,8 +30,8 @@ export const RingShowcase: React.FC<RingShowcaseProps> = ({
 
   // Responsive card dimensions & radius calculation
   const [dimensions, setDimensions] = useState({
-    cardWidth: 300,
-    cardHeight: 410,
+    cardWidth: 275,
+    cardHeight: 380,
     isMobile: false,
   });
 
@@ -40,8 +40,8 @@ export const RingShowcase: React.FC<RingShowcaseProps> = ({
       const isMob = window.innerWidth < 640;
       const isTab = window.innerWidth < 1024;
       setDimensions({
-        cardWidth: isMob ? 240 : isTab ? 280 : 310,
-        cardHeight: isMob ? 330 : isTab ? 380 : 420,
+        cardWidth: isMob ? 220 : isTab ? 250 : 275,
+        cardHeight: isMob ? 310 : isTab ? 350 : 380,
         isMobile: isMob,
       });
     };

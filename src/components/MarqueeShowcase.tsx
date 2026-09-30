@@ -42,10 +42,10 @@ function easeInOutCubic(x: number): number {
 
 // Constants for 6 cards per set
 const GAP = 24;
-const CARD_PITCH = 404; // 380px card + 24px gap
+const CARD_PITCH = 354; // 330px card + 24px gap
 const NUM_CARDS = 6;
-const SET_STRIDE = NUM_CARDS * CARD_PITCH; // 2424px
-const RING_RADIUS = 440; // Ring orbit radius in px
+const SET_STRIDE = NUM_CARDS * CARD_PITCH; // 2124px
+const RING_RADIUS = 380; // Ring orbit radius in px
 const INITIAL_TILT = 22; // rotateX degrees
 
 /**
