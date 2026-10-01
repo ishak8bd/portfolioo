@@ -218,23 +218,7 @@ export const OverviewHero: React.FC = () => {
             </AnimatePresence>
           </motion.div>
 
-          {/* Condensed Bio Summary & Philosophy Quote */}
-          <motion.div
-            initial={{ opacity: 0, y: 20, filter: 'blur(6px)' }}
-            whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.35, ease: [0.21, 0.47, 0.32, 0.98] }}
-            className="space-y-2.5 text-zinc-300 text-sm sm:text-base leading-relaxed font-light my-5 pt-4 border-t border-white/10 max-w-2xl"
-          >
-            <p>
-              Final-year <strong className="text-white font-medium">Computer Science Engineering student</strong> (Data Science track) at Université Saad Dahleb Blida 1. Focused on continuous Deep Reinforcement Learning agents, multi-dialect RAG pipelines, and high-concurrency real-time microservices.
-            </p>
-            <p className="italic text-zinc-400 text-xs sm:text-sm font-mono flex items-center gap-2">
-              <span className="text-cyan-400 font-bold">&ldquo;</span>
-              <span>Open to interesting problems — especially the ones that don&apos;t fit in a textbook.</span>
-              <span className="text-cyan-400 font-bold">&rdquo;</span>
-            </p>
-          </motion.div>
+
 
           {/* Quick Action Navigation CTAs */}
           <motion.div
