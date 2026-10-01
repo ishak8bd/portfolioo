@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Activity,
@@ -21,6 +21,18 @@ type LensRole = 'ai' | 'swe' | 'data';
 
 export const OverviewHero: React.FC = () => {
   const [activeRole, setActiveRole] = useState<LensRole>('ai');
+
+  // Automatically cycle through AI Engineer, Software Engineer, and Data Scientist
+  useEffect(() => {
+    const roles: LensRole[] = ['ai', 'swe', 'data'];
+    const timer = setInterval(() => {
+      setActiveRole((prev) => {
+        const nextIdx = (roles.indexOf(prev) + 1) % roles.length;
+        return roles[nextIdx];
+      });
+    }, 3800);
+    return () => clearInterval(timer);
+  }, []);
 
   // 3D Tilt calculation for Profile Picture Card
   const cardRef = useRef<HTMLDivElement>(null);
@@ -137,52 +149,42 @@ export const OverviewHero: React.FC = () => {
             </div>
           </motion.div>
 
-          {/* Interactive Lens Selector Tabs with Appearance Motion */}
+          {/* Automatically Rotating Dynamic Role Badge */}
           <motion.div
             initial={{ opacity: 0, y: 18, filter: 'blur(6px)' }}
             whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.15, ease: [0.21, 0.47, 0.32, 0.98] }}
-            className="flex flex-wrap items-center gap-2 mb-6 p-1.5 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-lg w-fit"
+            className="mb-5 flex items-center gap-2"
           >
-            <span className="text-xs font-mono text-zinc-400 px-2 hidden sm:inline">
-              Lens:
-            </span>
-            <button
-              onClick={() => setActiveRole('ai')}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer ${
-                activeRole === 'ai'
-                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm shadow-cyan-500/20'
-                  : 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
-              }`}
-            >
-              <BrainCircuit className="w-3.5 h-3.5 text-cyan-400" />
-              <span>AI Engineer</span>
-            </button>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeRole}
+                initial={{ opacity: 0, y: 8, filter: 'blur(4px)' }}
+                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                exit={{ opacity: 0, y: -8, filter: 'blur(4px)' }}
+                transition={{ duration: 0.35, ease: 'easeOut' }}
+                className={`inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full text-xs font-mono border backdrop-blur-md ${currentLens.badgeColor}`}
+              >
+                {activeRole === 'ai' && <BrainCircuit className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />}
+                {activeRole === 'swe' && <Code2 className="w-3.5 h-3.5 text-blue-400 animate-pulse" />}
+                {activeRole === 'data' && <Database className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />}
+                <span className="font-semibold tracking-wider uppercase">{currentLens.title}</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-current animate-ping opacity-75" />
+              </motion.div>
+            </AnimatePresence>
 
-            <button
-              onClick={() => setActiveRole('swe')}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer ${
-                activeRole === 'swe'
-                  ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40 shadow-sm shadow-blue-500/20'
-                  : 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
-              }`}
-            >
-              <Code2 className="w-3.5 h-3.5 text-blue-400" />
-              <span>Software Engineer</span>
-            </button>
-
-            <button
-              onClick={() => setActiveRole('data')}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer ${
-                activeRole === 'data'
-                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm shadow-emerald-500/20'
-                  : 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
-              }`}
-            >
-              <Database className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Data Scientist</span>
-            </button>
+            {/* Subtle cycling progress indicator dots */}
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-white/[0.02] border border-white/5">
+              {(['ai', 'swe', 'data'] as const).map((r) => (
+                <span
+                  key={r}
+                  className={`w-1.5 h-1.5 rounded-full transition-all duration-500 ${
+                    activeRole === r ? 'bg-cyan-400 scale-125' : 'bg-zinc-700'
+                  }`}
+                />
+              ))}
+            </div>
           </motion.div>
 
           {/* Dynamic Headline & Focus Pill with Appearance Motion */}
