@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Activity,
@@ -11,6 +11,9 @@ import {
   Flame,
   Layers,
   ArrowRight,
+  Shield,
+  MapPin,
+  Mail,
   User,
 } from 'lucide-react';
 
@@ -18,6 +21,28 @@ type LensRole = 'ai' | 'swe' | 'data';
 
 export const OverviewHero: React.FC = () => {
   const [activeRole, setActiveRole] = useState<LensRole>('ai');
+
+  // 3D Tilt calculation for Profile Picture Card
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [tilt, setTilt] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    const tiltX = ((y - centerY) / centerY) * -10;
+    const tiltY = ((x - centerX) / centerX) * 10;
+
+    setTilt({ x: tiltX, y: tiltY });
+  };
+
+  const handleMouseLeave = () => {
+    setTilt({ x: 0, y: 0 });
+  };
 
   const roleDetails = {
     ai: {
@@ -84,155 +109,317 @@ export const OverviewHero: React.FC = () => {
       {/* Anchor for backward compatibility */}
       <div id="bento-grid" className="-mt-20 pt-20" />
 
-      {/* Main Overview Typography & Hero Content */}
-      <div className="max-w-4xl mx-auto text-center flex flex-col items-center mb-16 sm:mb-20">
-        {/* Availability & Motto Banner with Appearance Motion */}
-        <motion.div
-          initial={{ opacity: 0, y: 18, filter: 'blur(6px)' }}
-          whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.05, ease: [0.21, 0.47, 0.32, 0.98] }}
-          className="flex flex-wrap items-center justify-center gap-3 mb-6"
-        >
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-mono backdrop-blur-md shadow-sm">
-            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-            <span>OVERVIEW // ISHAK BOUDAOUD</span>
-          </div>
+      {/* ======================================================== */}
+      {/* OVERVIEW 2-COLUMN ROW: Overview Text (Left) & Profile Card (Right) */}
+      {/* ======================================================== */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 mb-14 sm:mb-18 items-center">
+        {/* LEFT COLUMN: Overview Typography & Interactive Lens (7 cols on lg) */}
+        <div className="lg:col-span-7 flex flex-col justify-center text-left">
+          {/* Availability & Motto Banner with Appearance Motion */}
+          <motion.div
+            initial={{ opacity: 0, y: 18, filter: 'blur(6px)' }}
+            whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.05, ease: [0.21, 0.47, 0.32, 0.98] }}
+            className="flex flex-wrap items-center gap-3 mb-6"
+          >
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-mono backdrop-blur-md shadow-sm">
+              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+              <span>OVERVIEW // ISHAK BOUDAOUD</span>
+            </div>
 
-          <div className="flex items-center gap-2 text-xs font-mono text-emerald-400 bg-emerald-950/40 border border-emerald-500/30 px-3 py-1 rounded-full backdrop-blur-md">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+            <div className="flex items-center gap-2 text-xs font-mono text-emerald-400 bg-emerald-950/40 border border-emerald-500/30 px-3 py-1 rounded-full backdrop-blur-md">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+              </span>
+              <span>Blida, DZ · UTC+1 · Open to Opportunities</span>
+            </div>
+          </motion.div>
+
+          {/* Interactive Lens Selector Tabs with Appearance Motion */}
+          <motion.div
+            initial={{ opacity: 0, y: 18, filter: 'blur(6px)' }}
+            whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.15, ease: [0.21, 0.47, 0.32, 0.98] }}
+            className="flex flex-wrap items-center gap-2 mb-6 p-1.5 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-lg w-fit"
+          >
+            <span className="text-xs font-mono text-zinc-400 px-2 hidden sm:inline">
+              Lens:
             </span>
-            <span>Blida, DZ · UTC+1 · Open to Opportunities</span>
-          </div>
-        </motion.div>
-
-        {/* Interactive Lens Selector Tabs with Appearance Motion */}
-        <motion.div
-          initial={{ opacity: 0, y: 18, filter: 'blur(6px)' }}
-          whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.15, ease: [0.21, 0.47, 0.32, 0.98] }}
-          className="flex flex-wrap items-center justify-center gap-2 mb-8 p-1.5 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-lg"
-        >
-          <span className="text-xs font-mono text-zinc-400 px-2 hidden sm:inline">
-            Lens:
-          </span>
-          <button
-            onClick={() => setActiveRole('ai')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer ${
-              activeRole === 'ai'
-                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm shadow-cyan-500/20'
-                : 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
-            }`}
-          >
-            <BrainCircuit className="w-3.5 h-3.5 text-cyan-400" />
-            <span>AI Engineer</span>
-          </button>
-
-          <button
-            onClick={() => setActiveRole('swe')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer ${
-              activeRole === 'swe'
-                ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40 shadow-sm shadow-blue-500/20'
-                : 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
-            }`}
-          >
-            <Code2 className="w-3.5 h-3.5 text-blue-400" />
-            <span>Software Engineer</span>
-          </button>
-
-          <button
-            onClick={() => setActiveRole('data')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer ${
-              activeRole === 'data'
-                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm shadow-emerald-500/20'
-                : 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
-            }`}
-          >
-            <Database className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Data Scientist</span>
-          </button>
-        </motion.div>
-
-        {/* Dynamic Headline & Focus Pill with Appearance Motion */}
-        <motion.div
-          initial={{ opacity: 0, y: 24, filter: 'blur(8px)' }}
-          whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7, delay: 0.25, ease: [0.21, 0.47, 0.32, 0.98] }}
-          className="mb-6 w-full"
-        >
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeRole}
-              initial={{ opacity: 0, y: 12, filter: 'blur(4px)' }}
-              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-              exit={{ opacity: 0, y: -12, filter: 'blur(4px)' }}
-              transition={{ duration: 0.3 }}
+            <button
+              onClick={() => setActiveRole('ai')}
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer ${
+                activeRole === 'ai'
+                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm shadow-cyan-500/20'
+                  : 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
+              }`}
             >
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-white leading-[1.08] mb-4">
-                Engineering the <br />
-                <span className={`bg-gradient-to-r ${currentLens.accentGrad} bg-clip-text text-transparent`}>
-                  {currentLens.headline}
-                </span>
-              </h1>
-              <p className="text-base sm:text-lg md:text-xl text-zinc-300 max-w-2xl mx-auto font-light leading-relaxed mb-5">
-                {currentLens.tagline}
-              </p>
-              <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-mono border ${currentLens.badgeColor} backdrop-blur-md`}>
-                <Zap className="w-3.5 h-3.5" />
-                <span>Core: {currentLens.focus}</span>
-              </div>
-            </motion.div>
-          </AnimatePresence>
-        </motion.div>
+              <BrainCircuit className="w-3.5 h-3.5 text-cyan-400" />
+              <span>AI Engineer</span>
+            </button>
 
-        {/* Quick Action Navigation CTAs */}
+            <button
+              onClick={() => setActiveRole('swe')}
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer ${
+                activeRole === 'swe'
+                  ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40 shadow-sm shadow-blue-500/20'
+                  : 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
+              }`}
+            >
+              <Code2 className="w-3.5 h-3.5 text-blue-400" />
+              <span>Software Engineer</span>
+            </button>
+
+            <button
+              onClick={() => setActiveRole('data')}
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer ${
+                activeRole === 'data'
+                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm shadow-emerald-500/20'
+                  : 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
+              }`}
+            >
+              <Database className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Data Scientist</span>
+            </button>
+          </motion.div>
+
+          {/* Dynamic Headline & Focus Pill with Appearance Motion */}
+          <motion.div
+            initial={{ opacity: 0, y: 24, filter: 'blur(8px)' }}
+            whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7, delay: 0.25, ease: [0.21, 0.47, 0.32, 0.98] }}
+            className="mb-5"
+          >
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeRole}
+                initial={{ opacity: 0, y: 12, filter: 'blur(4px)' }}
+                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                exit={{ opacity: 0, y: -12, filter: 'blur(4px)' }}
+                transition={{ duration: 0.3 }}
+              >
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.12] mb-3">
+                  Engineering the <br className="hidden sm:inline" />
+                  <span className={`bg-gradient-to-r ${currentLens.accentGrad} bg-clip-text text-transparent`}>
+                    {currentLens.headline}
+                  </span>
+                </h1>
+                <p className="text-base sm:text-lg text-zinc-300 max-w-2xl font-light leading-relaxed mb-4">
+                  {currentLens.tagline}
+                </p>
+                <div className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-mono border ${currentLens.badgeColor} backdrop-blur-md`}>
+                  <Zap className="w-3.5 h-3.5" />
+                  <span>Core: {currentLens.focus}</span>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </motion.div>
+
+          {/* Condensed Bio Summary & Philosophy Quote */}
+          <motion.div
+            initial={{ opacity: 0, y: 20, filter: 'blur(6px)' }}
+            whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.35, ease: [0.21, 0.47, 0.32, 0.98] }}
+            className="space-y-2.5 text-zinc-300 text-sm sm:text-base leading-relaxed font-light my-5 pt-4 border-t border-white/10 max-w-2xl"
+          >
+            <p>
+              Final-year <strong className="text-white font-medium">Computer Science Engineering student</strong> (Data Science track) at Université Saad Dahleb Blida 1. Focused on continuous Deep Reinforcement Learning agents, multi-dialect RAG pipelines, and high-concurrency real-time microservices.
+            </p>
+            <p className="italic text-zinc-400 text-xs sm:text-sm font-mono flex items-center gap-2">
+              <span className="text-cyan-400 font-bold">&ldquo;</span>
+              <span>Open to interesting problems — especially the ones that don&apos;t fit in a textbook.</span>
+              <span className="text-cyan-400 font-bold">&rdquo;</span>
+            </p>
+          </motion.div>
+
+          {/* Quick Action Navigation CTAs */}
+          <motion.div
+            initial={{ opacity: 0, y: 20, filter: 'blur(6px)' }}
+            whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.45, ease: [0.21, 0.47, 0.32, 0.98] }}
+            className="flex flex-wrap items-center gap-3 sm:gap-4 pt-2"
+          >
+            <button
+              onClick={() => scrollTo('about')}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-black font-semibold text-xs sm:text-sm hover:bg-zinc-200 transition-all shadow-[0_0_25px_rgba(255,255,255,0.2)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+            >
+              <User className="w-4 h-4 text-cyan-600" />
+              <span>About Me & Ethos</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+
+            <button
+              onClick={() => scrollTo('projects')}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-white border border-white/10 text-xs sm:text-sm font-medium transition-all hover:border-white/25 cursor-pointer"
+            >
+              <Flame className="w-4 h-4 text-amber-500 fill-amber-500" />
+              <span>Projects Showcase (06)</span>
+            </button>
+
+            <button
+              onClick={() => scrollTo('experience')}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.02] hover:bg-white/[0.06] text-zinc-300 hover:text-white border border-white/10 text-xs sm:text-sm font-medium transition-all cursor-pointer"
+            >
+              <Briefcase className="w-4 h-4 text-emerald-400" />
+              <span>Experience Timeline</span>
+            </button>
+
+            <button
+              onClick={() => scrollTo('skills')}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.02] hover:bg-white/[0.06] text-zinc-300 hover:text-white border border-white/10 text-xs sm:text-sm font-medium transition-all cursor-pointer"
+            >
+              <Layers className="w-4 h-4 text-violet-400" />
+              <span>Skills Matrix</span>
+            </button>
+          </motion.div>
+        </div>
+
+        {/* RIGHT COLUMN: Profile Picture Cybernetic HUD Card (5 cols on lg) */}
         <motion.div
-          initial={{ opacity: 0, y: 20, filter: 'blur(6px)' }}
-          whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.35, ease: [0.21, 0.47, 0.32, 0.98] }}
-          className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 pt-3"
+          initial={{ opacity: 0, x: 40, filter: 'blur(8px)' }}
+          whileInView={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+          viewport={{ once: true, margin: '-50px' }}
+          transition={{ duration: 0.8, delay: 0.15, ease: [0.21, 0.47, 0.32, 0.98] }}
+          className="lg:col-span-5 flex flex-col justify-center items-center lg:items-end"
         >
-          <button
-            onClick={() => scrollTo('about')}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-black font-semibold text-xs sm:text-sm hover:bg-zinc-200 transition-all shadow-[0_0_25px_rgba(255,255,255,0.2)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-          >
-            <User className="w-4 h-4 text-cyan-600" />
-            <span>About Me & Ethos</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
+          {/* Cybernetic Aura / Ambient Backglow */}
+          <div className="relative group/avatar w-full max-w-[420px] mx-auto lg:mr-0">
+            <div className="absolute -inset-1.5 bg-gradient-to-r from-cyan-500/30 via-violet-600/30 to-blue-500/30 rounded-3xl blur-xl opacity-75 group-hover/avatar:opacity-100 transition duration-700 pointer-events-none" />
 
-          <button
-            onClick={() => scrollTo('projects')}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-white border border-white/10 text-xs sm:text-sm font-medium transition-all hover:border-white/25 cursor-pointer"
-          >
-            <Flame className="w-4 h-4 text-amber-500 fill-amber-500" />
-            <span>Projects Showcase (06)</span>
-          </button>
+            {/* 3D Tilt Card Container */}
+            <div
+              ref={cardRef}
+              onMouseMove={handleMouseMove}
+              onMouseLeave={handleMouseLeave}
+              style={{
+                transform: `perspective(800px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
+                transition: 'transform 0.15s ease-out',
+              }}
+              className="relative w-full rounded-2xl glass-panel border border-cyan-500/30 p-4 shadow-2xl bg-[#090c15]/95 backdrop-blur-xl overflow-hidden"
+            >
+              {/* Top HUD Bar */}
+              <div className="flex items-center justify-between px-2 pb-2.5 mb-3 border-b border-white/10 text-[11px] font-mono select-none">
+                <div className="flex items-center gap-1.5 text-cyan-300 font-semibold tracking-wider">
+                  <Shield className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>SYS_ID // 0x7F4A</span>
+                </div>
 
-          <button
-            onClick={() => scrollTo('experience')}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.02] hover:bg-white/[0.06] text-zinc-300 hover:text-white border border-white/10 text-xs sm:text-sm font-medium transition-all cursor-pointer"
-          >
-            <Briefcase className="w-4 h-4 text-emerald-400" />
-            <span>Experience Timeline</span>
-          </button>
+                <div className="flex items-center gap-1.5">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                  </span>
+                  <span className="text-emerald-400 font-bold">L5_ONLINE</span>
+                </div>
+              </div>
 
-          <button
-            onClick={() => scrollTo('skills')}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.02] hover:bg-white/[0.06] text-zinc-300 hover:text-white border border-white/10 text-xs sm:text-sm font-medium transition-all cursor-pointer"
-          >
-            <Layers className="w-4 h-4 text-violet-400" />
-            <span>Skills Matrix</span>
-          </button>
+              {/* Picture Viewport Frame with Cybernetic Corner Brackets */}
+              <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-black/60 border border-white/10 group/img">
+                {/* Cybernetic Corner Brackets */}
+                <div className="absolute top-2 left-2 w-3.5 h-3.5 border-t-2 border-l-2 border-cyan-400 pointer-events-none z-20" />
+                <div className="absolute top-2 right-2 w-3.5 h-3.5 border-t-2 border-r-2 border-cyan-400 pointer-events-none z-20" />
+                <div className="absolute bottom-2 left-2 w-3.5 h-3.5 border-b-2 border-l-2 border-cyan-400 pointer-events-none z-20" />
+                <div className="absolute bottom-2 right-2 w-3.5 h-3.5 border-b-2 border-r-2 border-cyan-400 pointer-events-none z-20" />
+
+                {/* Profile Image */}
+                <img
+                  src="/profile.jpg"
+                  alt="Ishak Boudaoud"
+                  className="w-full h-full object-cover object-top filter brightness-[0.98] contrast-[1.08] transition-transform duration-700 ease-out group-hover/img:scale-105 select-none"
+                />
+
+                {/* Moving Luminous Scanner Beam */}
+                <motion.div
+                  animate={{ y: ['-100%', '280%'] }}
+                  transition={{ repeat: Infinity, duration: 4.5, ease: 'easeInOut' }}
+                  className="absolute inset-x-0 h-24 bg-gradient-to-b from-transparent via-cyan-400/20 to-transparent pointer-events-none z-10"
+                />
+
+                {/* Holographic Scanline Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-400/5 to-transparent opacity-60 pointer-events-none" />
+
+                {/* Cinematic Vignette */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#090c15] via-transparent to-transparent opacity-85 pointer-events-none" />
+
+                {/* Floating Spec Badge at bottom left */}
+                <div className="absolute bottom-3 left-3 z-10">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#07080c]/90 border border-cyan-500/40 backdrop-blur-md text-[11px] font-mono text-cyan-300 shadow-md">
+                    <Zap className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>Deep RL & Agent Architect</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card Footer Details */}
+              <div className="pt-3 px-1 flex items-center justify-between text-xs font-mono">
+                <div>
+                  <div className="text-white font-bold tracking-tight text-sm">
+                    Ishak Boudaoud
+                  </div>
+                  <div className="text-[11px] text-zinc-400 flex items-center gap-1 mt-0.5">
+                    <MapPin className="w-3 h-3 text-violet-400 shrink-0" />
+                    <span>Blida, Algeria · Saad Dahleb Univ.</span>
+                  </div>
+                </div>
+
+                <div className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/10 text-cyan-300 border border-white/10">
+                  v22.0
+                </div>
+              </div>
+
+              {/* Quick Interactive Actions */}
+              <div className="grid grid-cols-3 gap-2 pt-3 mt-3 border-t border-white/5">
+                <motion.a
+                  whileHover={{ scale: 1.04, y: -2 }}
+                  whileTap={{ scale: 0.97 }}
+                  href="https://github.com/isaaxk"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.09] text-xs font-mono text-zinc-300 hover:text-white border border-white/10 transition-colors"
+                >
+                  <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                  </svg>
+                  <span>GitHub</span>
+                </motion.a>
+
+                <motion.a
+                  whileHover={{ scale: 1.04, y: -2 }}
+                  whileTap={{ scale: 0.97 }}
+                  href="https://linkedin.com/in/ishak-boudaoud-8729ba251"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.09] text-xs font-mono text-zinc-300 hover:text-white border border-white/10 transition-colors"
+                >
+                  <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                  </svg>
+                  <span>LinkedIn</span>
+                </motion.a>
+
+                <motion.a
+                  whileHover={{ scale: 1.04, y: -2 }}
+                  whileTap={{ scale: 0.97 }}
+                  href="mailto:truly.isaak@gmail.com"
+                  className="flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-xs font-mono text-cyan-400 hover:text-cyan-300 border border-cyan-500/30 transition-colors"
+                >
+                  <Mail className="w-3.5 h-3.5" />
+                  <span>Email</span>
+                </motion.a>
+              </div>
+            </div>
+          </div>
         </motion.div>
       </div>
 
-      {/* Telemetry Metrics Row */}
+      {/* ======================================================== */}
+      {/* TELEMETRY METRICS ROW                                    */}
+      {/* ======================================================== */}
       <div className="w-full grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 text-left">
         {telemetryMetrics.map((metric, idx) => (
           <motion.div
