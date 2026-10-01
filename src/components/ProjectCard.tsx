@@ -53,7 +53,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) =>
           }}
         >
           {/* Background Image with Cinematic Filter & Zoom */}
-          <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <img
               src={project.image}
               alt={project.title}

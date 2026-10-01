@@ -366,14 +366,11 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
     if (e.button !== 0) return;
 
     isPointerDownRef.current = true;
-    setIsDragging(true);
     startXRef.current = e.clientX;
     lastXRef.current = e.clientX;
     lastTimeRef.current = performance.now();
     totalDragDistanceRef.current = 0;
     dragVelocityRef.current = 0;
-
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
@@ -383,19 +380,30 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
     const dx = currentX - lastXRef.current;
     totalDragDistanceRef.current += Math.abs(dx);
 
-    const now = performance.now();
-    const dt = Math.max(now - lastTimeRef.current, 8);
+    if (totalDragDistanceRef.current > 6) {
+      if (!isDragging) {
+        setIsDragging(true);
+        try {
+          (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+        } catch {
+          // Ignored
+        }
+      }
 
-    if (singleSetWidth > 0) {
-      const nextPos = x.get() + dx;
-      x.set(wrapRange(-singleSetWidth, 0, nextPos));
-    } else {
-      x.set(x.get() + dx);
+      const now = performance.now();
+      const dt = Math.max(now - lastTimeRef.current, 8);
+
+      if (singleSetWidth > 0) {
+        const nextPos = x.get() + dx;
+        x.set(wrapRange(-singleSetWidth, 0, nextPos));
+      } else {
+        x.set(x.get() + dx);
+      }
+
+      dragVelocityRef.current = (dx / dt) * 16.6;
+      lastXRef.current = currentX;
+      lastTimeRef.current = now;
     }
-
-    dragVelocityRef.current = (dx / dt) * 16.6;
-    lastXRef.current = currentX;
-    lastTimeRef.current = now;
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
@@ -696,7 +704,7 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
           <motion.div
             animate={{ opacity: phase === 'looping' ? 1 : 0 }}
             transition={{ duration: 0.6 }}
-            className="flex gap-6 shrink-0"
+            className={`flex gap-6 shrink-0 ${phase === 'looping' ? '' : 'pointer-events-none'}`}
             style={{ transformStyle: 'preserve-3d' }}
           >
             {projects.slice(0, NUM_CARDS).map((project) => (
@@ -713,7 +721,7 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
           <motion.div
             animate={{ opacity: phase === 'looping' ? 1 : 0 }}
             transition={{ duration: 0.6 }}
-            className="flex gap-6 shrink-0"
+            className={`flex gap-6 shrink-0 ${phase === 'looping' ? '' : 'pointer-events-none'}`}
             style={{ transformStyle: 'preserve-3d' }}
           >
             {projects.slice(0, NUM_CARDS).map((project) => (
