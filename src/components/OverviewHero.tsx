@@ -58,6 +58,7 @@ export const OverviewHero: React.FC = () => {
 
   const roleDetails = {
     ai: {
+      categoryTag: 'SPECIALIZATION 01 // ARTIFICIAL INTELLIGENCE',
       title: 'AI Engineer',
       headline: 'Autonomous Agents & Deep RL Frontiers',
       tagline: 'Reinforcement learning agents, continuous-action surge pricing & custom LLM tool-calling architectures.',
@@ -66,6 +67,7 @@ export const OverviewHero: React.FC = () => {
       accentGrad: 'from-cyan-400 via-sky-300 to-white',
     },
     swe: {
+      categoryTag: 'SPECIALIZATION 02 // DISTRIBUTED SYSTEMS',
       title: 'Software Engineer',
       headline: 'Distributed Microservices & Real-Time Engines',
       tagline: 'High-concurrency platforms, Go/WebSockets, Kafka, PostgreSQL GiST constraints & zero-trust game engines.',
@@ -74,6 +76,7 @@ export const OverviewHero: React.FC = () => {
       accentGrad: 'from-blue-400 via-indigo-300 to-white',
     },
     data: {
+      categoryTag: 'SPECIALIZATION 03 // APPLIED DATA SCIENCE',
       title: 'Data Scientist',
       headline: 'Geospatial Modeling & Empirical Optimization',
       tagline: 'Optimizing 242 NYC zones, weather lift estimation (+$71K) & time-series predictive systems.',
@@ -155,7 +158,7 @@ export const OverviewHero: React.FC = () => {
             whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.15, ease: [0.21, 0.47, 0.32, 0.98] }}
-            className="mb-5 flex items-center gap-2"
+            className="mb-4 flex items-center gap-2"
           >
             <AnimatePresence mode="wait">
               <motion.div
@@ -169,7 +172,7 @@ export const OverviewHero: React.FC = () => {
                 {activeRole === 'ai' && <BrainCircuit className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />}
                 {activeRole === 'swe' && <Code2 className="w-3.5 h-3.5 text-blue-400 animate-pulse" />}
                 {activeRole === 'data' && <Database className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />}
-                <span className="font-semibold tracking-wider uppercase">{currentLens.title}</span>
+                <span className="font-semibold tracking-wider uppercase">{currentLens.categoryTag}</span>
                 <span className="w-1.5 h-1.5 rounded-full bg-current animate-ping opacity-75" />
               </motion.div>
             </AnimatePresence>
@@ -203,12 +206,19 @@ export const OverviewHero: React.FC = () => {
                 exit={{ opacity: 0, y: -12, filter: 'blur(4px)' }}
                 transition={{ duration: 0.3 }}
               >
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.12] mb-3">
-                  Engineering the <br className="hidden sm:inline" />
-                  <span className={`bg-gradient-to-r ${currentLens.accentGrad} bg-clip-text text-transparent`}>
-                    {currentLens.headline}
+                {/* 1. Main Role Title: AI Engineer / Software Engineer / Data Scientist (significantly BIGGER) */}
+                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight leading-[1.04] mb-3">
+                  <span className={`bg-gradient-to-r ${currentLens.accentGrad} bg-clip-text text-transparent drop-shadow-sm`}>
+                    {currentLens.title}
                   </span>
                 </h1>
+
+                {/* 2. Secondary Subhead: Engineering the ... (smaller than role title) */}
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-zinc-100 leading-snug mb-3">
+                  <span className="text-zinc-400 font-normal">Engineering the </span>
+                  <span className="text-white">{currentLens.headline}</span>
+                </h2>
+
                 <p className="text-base sm:text-lg text-zinc-300 max-w-2xl font-light leading-relaxed mb-4">
                   {currentLens.tagline}
                 </p>
