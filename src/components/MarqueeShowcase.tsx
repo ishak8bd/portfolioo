@@ -10,8 +10,6 @@ import {
 import {
   ChevronLeft,
   ChevronRight,
-  Pause,
-  Play,
   MoveHorizontal,
   RotateCcw,
   Layers,
@@ -552,9 +550,7 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
             </span>
           </h2>
           <p className="mt-2 text-sm sm:text-base text-zinc-400 max-w-xl">
-            {phase !== 'looping'
-              ? 'Synchronized 3D ring orbit unfolding into continuous horizontal stream...'
-              : 'Hover to pause. Drag, scroll or scrub the bar below to navigate. Click any card for the architectural breakdown.'}
+            Drag, scroll, or scrub the bar below to navigate. Click any card for the architectural breakdown.
           </p>
         </div>
 
@@ -587,31 +583,6 @@ export const MarqueeShowcase: React.FC<MarqueeShowcaseProps> = ({
               </button>
             </div>
           )}
-
-          {/* Status Indicator */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/10 text-xs font-mono text-zinc-400">
-            {phase === 'spinning' ? (
-              <>
-                <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping" />
-                <span className="text-sky-300">Ring Orbit</span>
-              </>
-            ) : phase === 'unfolding' ? (
-              <>
-                <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
-                <span className="text-indigo-300">Unfolding</span>
-              </>
-            ) : isHovered || isDragging || isUserActive ? (
-              <>
-                <Pause className="w-3 h-3 text-amber-400" />
-                <span className="text-amber-300">Paused</span>
-              </>
-            ) : (
-              <>
-                <Play className="w-3 h-3 text-emerald-400" />
-                <span className="text-zinc-300">Continuous Loop</span>
-              </>
-            )}
-          </div>
 
           {/* Replay Entrance Button */}
           <button

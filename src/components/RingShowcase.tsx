@@ -277,35 +277,7 @@ export const RingShowcase: React.FC<RingShowcaseProps> = ({
             </div>
           )}
 
-          {/* Status Indicator (Continuous Spin / Card Flipped / Paused / Rotating) */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/10 text-xs font-mono text-zinc-400">
-            {isDragging ? (
-              <>
-                <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping" />
-                <span className="text-sky-300">Rotating</span>
-              </>
-            ) : flippedCardIndex !== null ? (
-              <>
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                <span className="text-amber-300">Card Flipped</span>
-              </>
-            ) : isCardHovered ? (
-              <>
-                <Pause className="w-3 h-3 text-amber-400" />
-                <span className="text-amber-300">Paused</span>
-              </>
-            ) : autoRotate ? (
-              <>
-                <Play className="w-3 h-3 text-emerald-400" />
-                <span className="text-zinc-300">Continuous Spin</span>
-              </>
-            ) : (
-              <>
-                <Pause className="w-3 h-3 text-zinc-500" />
-                <span className="text-zinc-400">Paused</span>
-              </>
-            )}
-          </div>
+
 
           {/* Auto-Rotation Toggle */}
           <button
