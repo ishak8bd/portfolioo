@@ -21,6 +21,8 @@ import {
   Database,
   Network,
   GitBranch,
+  Flame,
+  ArrowRight,
 } from 'lucide-react';
 
 const cardVariant: Variants = {
@@ -119,7 +121,7 @@ export const BentoGrid: React.FC = () => {
   ];
 
   return (
-    <section id="overview" className="max-w-7xl mx-auto px-6 sm:px-8 py-20 scroll-mt-20">
+    <section id="overview" className="max-w-7xl mx-auto px-6 sm:px-8 pt-28 sm:pt-36 pb-20 scroll-mt-20 relative z-10">
       {/* Anchor for backward compatibility */}
       <div id="bento-grid" className="-mt-20 pt-20" />
 
@@ -265,6 +267,24 @@ export const BentoGrid: React.FC = () => {
                   Continuous-action surge pricing across 242 NYC zones (TD3/SAC/PPO), +18% lift & +$71K weather lift.
                 </p>
               </motion.div>
+            </div>
+            {/* Action Buttons to explore projects */}
+            <div className="flex flex-wrap items-center gap-3 pt-1 mb-5">
+              <button
+                onClick={() => document.getElementById('marquee-showcase')?.scrollIntoView({ behavior: 'smooth' })}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-black font-semibold text-xs sm:text-sm hover:bg-zinc-200 transition-all shadow-[0_0_25px_rgba(255,255,255,0.2)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              >
+                <Flame className="w-4 h-4 text-amber-500 fill-amber-500" />
+                <span>Explore Flagship Works (06)</span>
+              </button>
+
+              <button
+                onClick={() => document.getElementById('about-contact')?.scrollIntoView({ behavior: 'smooth' })}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-white border border-white/10 text-xs sm:text-sm font-medium transition-all cursor-pointer"
+              >
+                <span>Connect</span>
+                <ArrowRight className="w-3.5 h-3.5 text-zinc-400" />
+              </button>
             </div>
           </div>
 

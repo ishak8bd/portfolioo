@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Navbar } from './components/Navbar';
-import { Hero } from './components/Hero';
+import { ConstellationCanvas } from './components/ConstellationCanvas';
 import { BentoGrid } from './components/BentoGrid';
 import { RingShowcase } from './components/RingShowcase';
 import { MarqueeShowcase } from './components/MarqueeShowcase';
@@ -19,12 +19,12 @@ export function App() {
       {/* Top Floating Navigation */}
       <Navbar />
 
+      {/* Ambient Interactive Particle Constellation Web */}
+      <ConstellationCanvas />
+
       {/* Main Content Sections */}
       <main className="relative">
-        {/* Section 1: Hero with Interactive Particle Constellation */}
-        <Hero />
-
-        {/* Section 2: Bento Grid (Overview - Skills, Stack, Stats) */}
+        {/* Section 1: Bento Grid (Overview - Profile Card on Right, About Me on Left, Telemetry & Skills Matrix) */}
         <BentoGrid />
 
         {/* Section 3: 3D Ring Project Showcase (Default) with Marquee View Toggle */}
