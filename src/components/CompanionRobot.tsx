@@ -437,7 +437,7 @@ export const CompanionRobot: React.FC = () => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       aria-label="3D Interactive Companion Droid"
-      className="fixed bottom-8 right-8 z-50 flex flex-col items-center cursor-grab active:cursor-grabbing select-none"
+      className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 z-50 hidden sm:flex flex-col items-center cursor-grab active:cursor-grabbing select-none"
       title="Tap in the robot to spin 180° • Drag anywhere"
     >
       {/* 3D WebGL Canvas Container: Tap to Spin 180° */}

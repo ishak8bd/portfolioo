@@ -126,152 +126,189 @@ export const BentoGrid: React.FC = () => {
       {/* ======================================================== */}
       {/* 1. OVERVIEW TOP ROW: About Me (Left) & Profile Card (Right) */}
       {/* ======================================================== */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 mb-10 sm:mb-12 items-stretch">
-        {/* LEFT COLUMN: Overview / About Me / Interactive Lens (7 cols on lg) */}
-        <motion.div
-          initial={{ opacity: 0, x: -45, filter: 'blur(8px)' }}
-          whileInView={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
-          viewport={{ once: true, margin: '-60px' }}
-          transition={{ duration: 0.85, ease: [0.21, 0.47, 0.32, 0.98] }}
-          className="lg:col-span-7 p-6 sm:p-8 md:p-9 rounded-3xl bg-[#0b0d13] border border-white/10 hover:border-cyan-500/40 relative overflow-hidden flex flex-col justify-between group shadow-[0_20px_50px_rgba(0,0,0,0.6)] transition-all duration-500"
-        >
-          {/* Ambient Lighting Background */}
-          <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-500/10 blur-3xl rounded-full pointer-events-none group-hover:bg-cyan-500/20 transition-all duration-700" />
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 mb-12 sm:mb-16 items-center">
+        {/* LEFT COLUMN: Overview / About Me Typography & Interactive Lens (7 cols on lg) */}
+        <div className="lg:col-span-7 flex flex-col justify-center text-left">
+          {/* Availability & Motto Banner with Appearance Motion */}
           <motion.div
-            animate={{ opacity: [0.08, 0.2, 0.08] }}
-            transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-            className="absolute bottom-0 right-10 w-72 h-72 bg-violet-500/10 blur-[100px] rounded-full pointer-events-none"
-          />
-
-          <div>
-            {/* Availability & Motto Banner */}
-            <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-mono">
-                <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-                <span>OVERVIEW // ABOUT ME</span>
-              </div>
-
-              <div className="flex items-center gap-1.5 text-[11px] font-mono text-emerald-400 bg-emerald-950/40 border border-emerald-500/30 px-2.5 py-0.5 rounded-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span>DZ · UTC+1</span>
-              </div>
+            initial={{ opacity: 0, y: 20, filter: 'blur(6px)' }}
+            whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.05, ease: [0.21, 0.47, 0.32, 0.98] }}
+            className="flex flex-wrap items-center gap-3 mb-6"
+          >
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-mono backdrop-blur-md shadow-sm">
+              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+              <span>OVERVIEW // ABOUT ME</span>
             </div>
 
-            {/* Interactive Lens Selector Tabs (inspired by isaaxk/portfolio) */}
-            <div className="flex flex-wrap items-center gap-2 mb-6 p-1.5 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-lg">
-              <span className="text-xs font-mono text-zinc-400 px-2 hidden sm:inline">
-                Lens:
+            <div className="flex items-center gap-2 text-xs font-mono text-emerald-400 bg-emerald-950/40 border border-emerald-500/30 px-3 py-1 rounded-full backdrop-blur-md">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
               </span>
-              <button
-                onClick={() => setActiveRole('ai')}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-mono transition-all ${
-                  activeRole === 'ai'
-                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm shadow-cyan-500/20'
-                    : 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
-                }`}
-              >
-                <BrainCircuit className="w-3.5 h-3.5 text-cyan-400" />
-                <span>AI Engineer</span>
-              </button>
-
-              <button
-                onClick={() => setActiveRole('swe')}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-mono transition-all ${
-                  activeRole === 'swe'
-                    ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40 shadow-sm shadow-blue-500/20'
-                    : 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
-                }`}
-              >
-                <Code2 className="w-3.5 h-3.5 text-blue-400" />
-                <span>Software Engineer</span>
-              </button>
-
-              <button
-                onClick={() => setActiveRole('data')}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-mono transition-all ${
-                  activeRole === 'data'
-                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm shadow-emerald-500/20'
-                    : 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
-                }`}
-              >
-                <Database className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Data Scientist</span>
-              </button>
+              <span>Blida, DZ · UTC+1 · Open to Opportunities</span>
             </div>
+          </motion.div>
 
-            {/* Dynamic Headline & Tagline based on active role */}
+          {/* Interactive Lens Selector Tabs with Appearance Motion */}
+          <motion.div
+            initial={{ opacity: 0, y: 20, filter: 'blur(6px)' }}
+            whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.15, ease: [0.21, 0.47, 0.32, 0.98] }}
+            className="flex flex-wrap items-center gap-2 mb-6 p-1.5 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-lg w-fit"
+          >
+            <span className="text-xs font-mono text-zinc-400 px-2 hidden sm:inline">
+              Lens:
+            </span>
+            <button
+              onClick={() => setActiveRole('ai')}
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer ${
+                activeRole === 'ai'
+                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm shadow-cyan-500/20'
+                  : 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
+              }`}
+            >
+              <BrainCircuit className="w-3.5 h-3.5 text-cyan-400" />
+              <span>AI Engineer</span>
+            </button>
+
+            <button
+              onClick={() => setActiveRole('swe')}
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer ${
+                activeRole === 'swe'
+                  ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40 shadow-sm shadow-blue-500/20'
+                  : 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
+              }`}
+            >
+              <Code2 className="w-3.5 h-3.5 text-blue-400" />
+              <span>Software Engineer</span>
+            </button>
+
+            <button
+              onClick={() => setActiveRole('data')}
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer ${
+                activeRole === 'data'
+                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm shadow-emerald-500/20'
+                  : 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
+              }`}
+            >
+              <Database className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Data Scientist</span>
+            </button>
+          </motion.div>
+
+          {/* Dynamic Headline & Focus Pill with Appearance Motion */}
+          <motion.div
+            initial={{ opacity: 0, y: 25, filter: 'blur(8px)' }}
+            whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7, delay: 0.25, ease: [0.21, 0.47, 0.32, 0.98] }}
+            className="mb-5"
+          >
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeRole}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.25 }}
-                className="mb-4"
+                initial={{ opacity: 0, y: 12, filter: 'blur(4px)' }}
+                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                exit={{ opacity: 0, y: -12, filter: 'blur(4px)' }}
+                transition={{ duration: 0.3 }}
               >
-                <h2 className={`text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight bg-gradient-to-r ${currentLens.accentGrad} bg-clip-text text-transparent leading-tight mb-2.5`}>
-                  {currentLens.headline}
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-white leading-[1.12] mb-3">
+                  Engineering the <br className="hidden sm:inline" />
+                  <span className={`bg-gradient-to-r ${currentLens.accentGrad} bg-clip-text text-transparent`}>
+                    {currentLens.headline}
+                  </span>
                 </h2>
-                <p className="text-zinc-300 text-sm sm:text-base leading-relaxed font-light">
+                <p className="text-base sm:text-lg text-zinc-300 max-w-2xl font-light leading-relaxed mb-4">
                   {currentLens.tagline}
                 </p>
-                <div className={`mt-3 inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono border ${currentLens.badgeColor}`}>
-                  <Zap className="w-3 h-3" />
+                <div className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-mono border ${currentLens.badgeColor} backdrop-blur-md`}>
+                  <Zap className="w-3.5 h-3.5" />
                   <span>Core: {currentLens.focus}</span>
                 </div>
               </motion.div>
             </AnimatePresence>
+          </motion.div>
 
-            {/* Condensed Bio & Engineering Philosophy */}
-            <div className="space-y-2 text-zinc-300 text-sm sm:text-base leading-relaxed font-light my-4 pt-3 border-t border-white/5">
-              <p>
-                Final-year <strong className="text-white font-medium">Computer Science Engineering student</strong> (Data Science track) at Université Saad Dahleb Blida 1. Focused on continuous Deep Reinforcement Learning agents, multi-dialect RAG pipelines, and high-concurrency real-time microservices.
-              </p>
-              <p className="italic text-zinc-400 text-xs sm:text-sm">
-                &ldquo;Open to interesting problems — especially the ones that don&apos;t fit in a textbook.&rdquo;
-              </p>
-            </div>
+          {/* Condensed Bio & Engineering Philosophy with Appearance Motion */}
+          <motion.div
+            initial={{ opacity: 0, y: 20, filter: 'blur(6px)' }}
+            whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.35, ease: [0.21, 0.47, 0.32, 0.98] }}
+            className="space-y-2.5 text-zinc-300 text-sm sm:text-base leading-relaxed font-light my-5 pt-4 border-t border-white/10 max-w-2xl"
+          >
+            <p>
+              Final-year <strong className="text-white font-medium">Computer Science Engineering student</strong> (Data Science track) at Université Saad Dahleb Blida 1. Focused on continuous Deep Reinforcement Learning agents, multi-dialect RAG pipelines, and high-concurrency real-time microservices.
+            </p>
+            <p className="italic text-zinc-400 text-xs sm:text-sm font-mono flex items-center gap-2">
+              <span className="text-cyan-400 font-bold">&ldquo;</span>
+              <span>Open to interesting problems — especially the ones that don&apos;t fit in a textbook.</span>
+              <span className="text-cyan-400 font-bold">&rdquo;</span>
+            </p>
+          </motion.div>
 
-            {/* Quick Action Buttons */}
-            <div className="flex flex-wrap items-center gap-3 pt-2 mb-6">
-              <button
-                onClick={() => document.getElementById('experience')?.scrollIntoView({ behavior: 'smooth' })}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-black font-semibold text-xs sm:text-sm hover:bg-zinc-200 transition-all shadow-[0_0_25px_rgba(255,255,255,0.2)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-              >
-                <Briefcase className="w-4 h-4 text-emerald-600" />
-                <span>View Full Experience (Timeline)</span>
-              </button>
+          {/* Quick Action Buttons with Appearance Motion */}
+          <motion.div
+            initial={{ opacity: 0, y: 20, filter: 'blur(6px)' }}
+            whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.45, ease: [0.21, 0.47, 0.32, 0.98] }}
+            className="flex flex-wrap items-center gap-3 sm:gap-4 pt-2 mb-6"
+          >
+            <button
+              onClick={() => document.getElementById('experience')?.scrollIntoView({ behavior: 'smooth' })}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-black font-semibold text-xs sm:text-sm hover:bg-zinc-200 transition-all shadow-[0_0_25px_rgba(255,255,255,0.2)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+            >
+              <Briefcase className="w-4 h-4 text-emerald-600" />
+              <span>View Experience Timeline</span>
+            </button>
 
-              <button
-                onClick={() => document.getElementById('marquee-showcase')?.scrollIntoView({ behavior: 'smooth' })}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-white border border-white/10 text-xs sm:text-sm font-medium transition-all hover:border-white/20 cursor-pointer"
-              >
-                <Flame className="w-4 h-4 text-amber-500 fill-amber-500" />
-                <span>Flagships (06)</span>
-              </button>
-            </div>
-          </div>
+            <button
+              onClick={() => document.getElementById('marquee-showcase')?.scrollIntoView({ behavior: 'smooth' })}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-white border border-white/10 text-xs sm:text-sm font-medium transition-all hover:border-white/25 cursor-pointer"
+            >
+              <Flame className="w-4 h-4 text-amber-500 fill-amber-500" />
+              <span>Flagship Systems (06)</span>
+            </button>
 
-          {/* Academic & Engineering Footer */}
-          <div className="pt-4 border-t border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-mono text-zinc-400">
+            <button
+              onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.02] hover:bg-white/[0.06] text-zinc-300 hover:text-white border border-white/10 text-xs sm:text-sm font-medium transition-all cursor-pointer"
+            >
+              <Layers className="w-4 h-4 text-cyan-400" />
+              <span>Case Studies</span>
+            </button>
+          </motion.div>
+
+          {/* Academic & Engineering Footnote with Appearance Motion */}
+          <motion.div
+            initial={{ opacity: 0, y: 20, filter: 'blur(6px)' }}
+            whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.55, ease: [0.21, 0.47, 0.32, 0.98] }}
+            className="pt-4 border-t border-white/10 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 text-xs font-mono text-zinc-400"
+          >
             <div className="flex items-center gap-2">
               <GraduationCap className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>Saad Dahleb Blida 1 · 5th Year Eng. Student</span>
+              <span>Saad Dahleb Blida 1 · 5th Year CS Eng.</span>
             </div>
             <div className="flex items-center gap-1.5 text-cyan-400">
               <Zap className="w-3.5 h-3.5 shrink-0" />
               <span>Full Pipeline: Research to Production</span>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
 
         {/* RIGHT COLUMN: Profile Picture Cybernetic HUD Card (5 cols on lg) */}
         <motion.div
           initial={{ opacity: 0, x: 45, filter: 'blur(8px)' }}
           whileInView={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
           viewport={{ once: true, margin: '-60px' }}
-          transition={{ duration: 0.85, delay: 0.1, ease: [0.21, 0.47, 0.32, 0.98] }}
-          className="lg:col-span-5 flex flex-col justify-center"
+          transition={{ duration: 0.85, delay: 0.2, ease: [0.21, 0.47, 0.32, 0.98] }}
+          className="lg:col-span-5 flex flex-col justify-center items-center lg:items-end"
         >
           {/* Cybernetic Aura / Ambient Backglow (inspired by isaaxk/portfolio ProfileAvatar) */}
           <div className="relative group/avatar w-full max-w-[420px] mx-auto">
