@@ -48,12 +48,25 @@ export const Navbar: React.FC = () => {
         </div>
 
         {/* Navigation Items */}
-        <nav className="hidden md:flex items-center gap-8 text-xs font-mono tracking-wider uppercase text-zinc-400">
+        <nav className="hidden md:flex items-center gap-7 text-xs font-mono tracking-wider uppercase text-zinc-400">
           <button
             onClick={() => scrollTo('overview')}
             className="hover:text-white transition-colors cursor-pointer"
           >
             Overview
+          </button>
+          <button
+            onClick={() => scrollTo('about')}
+            className="hover:text-cyan-400 transition-colors cursor-pointer"
+          >
+            About
+          </button>
+          <button
+            onClick={() => scrollTo('projects')}
+            className="hover:text-amber-400 transition-colors cursor-pointer flex items-center gap-1.5"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+            <span>Projects</span>
           </button>
           <button
             onClick={() => scrollTo('experience')}
@@ -62,14 +75,13 @@ export const Navbar: React.FC = () => {
             Experience
           </button>
           <button
-            onClick={() => scrollTo('marquee-showcase')}
-            className="hover:text-amber-400 transition-colors cursor-pointer flex items-center gap-1.5"
+            onClick={() => scrollTo('skills')}
+            className="hover:text-violet-400 transition-colors cursor-pointer"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-            <span>Flagships (06)</span>
+            Skills
           </button>
           <button
-            onClick={() => scrollTo('about-contact')}
+            onClick={() => scrollTo('contact')}
             className="hover:text-white transition-colors cursor-pointer"
           >
             Contact
@@ -78,7 +90,7 @@ export const Navbar: React.FC = () => {
 
         {/* Action Button */}
         <button
-          onClick={() => scrollTo('about-contact')}
+          onClick={() => scrollTo('contact')}
           className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-mono uppercase tracking-wider transition-all hover:border-white/20"
         >
           <span>Connect</span>

@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { Navbar } from './components/Navbar';
 import { ConstellationCanvas } from './components/ConstellationCanvas';
-import { BentoGrid } from './components/BentoGrid';
-import { ExperienceSection } from './components/ExperienceSection';
+import { OverviewHero } from './components/OverviewHero';
+import { AboutSection } from './components/AboutSection';
 import { RingShowcase } from './components/RingShowcase';
 import { MarqueeShowcase } from './components/MarqueeShowcase';
-import { AboutContact } from './components/AboutContact';
+import { ExperienceSection } from './components/ExperienceSection';
+import { SkillsSection } from './components/SkillsSection';
+import { ContactSection } from './components/ContactSection';
 import { ProjectModal } from './components/ProjectModal';
 import { CompanionRobot } from './components/CompanionRobot';
 import { PROJECTS } from './data/projects';
@@ -23,35 +25,43 @@ export function App() {
       {/* Ambient Interactive Particle Constellation Web */}
       <ConstellationCanvas />
 
-      {/* Main Content Sections */}
+      {/* Main Content Sections: Exact Sequential Order */}
       <main className="relative">
-        {/* Section 1: Bento Grid (Overview - Profile Card on Right, About Me on Left, Telemetry & Skills Matrix) */}
-        <BentoGrid />
+        {/* 1. Overview First */}
+        <OverviewHero />
 
-        {/* Section 2: Experience & Engineering Journey */}
-        <ExperienceSection />
+        {/* 2. About Me / Profile and Ethos */}
+        <AboutSection />
 
-        {/* Section 3: 3D Ring Project Showcase (Default) with Marquee View Toggle */}
-        <div id="marquee-showcase">
-          {viewMode === 'ring' ? (
-            <RingShowcase
-              projects={PROJECTS}
-              onSelectProject={(project) => setSelectedProject(project)}
-              viewMode={viewMode}
-              onToggleViewMode={setViewMode}
-            />
-          ) : (
-            <MarqueeShowcase
-              projects={PROJECTS}
-              onSelectProject={(project) => setSelectedProject(project)}
-              viewMode={viewMode}
-              onToggleViewMode={setViewMode}
-            />
-          )}
+        {/* 3. Projects Showcase (3D Ring / Marquee) */}
+        <div id="projects" className="scroll-mt-20">
+          <div id="marquee-showcase">
+            {viewMode === 'ring' ? (
+              <RingShowcase
+                projects={PROJECTS}
+                onSelectProject={(project) => setSelectedProject(project)}
+                viewMode={viewMode}
+                onToggleViewMode={setViewMode}
+              />
+            ) : (
+              <MarqueeShowcase
+                projects={PROJECTS}
+                onSelectProject={(project) => setSelectedProject(project)}
+                viewMode={viewMode}
+                onToggleViewMode={setViewMode}
+              />
+            )}
+          </div>
         </div>
 
-        {/* Section 4: About + Contact */}
-        <AboutContact />
+        {/* 4. Experience Timeline & Research */}
+        <ExperienceSection />
+
+        {/* 5. Skills, Architecture & Technical Depth */}
+        <SkillsSection />
+
+        {/* 6. Contact & Direct Connection */}
+        <ContactSection />
       </main>
 
       {/* Interactive Companion Robot that tracks cursor and flips */}
