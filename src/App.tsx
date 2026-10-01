@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Navbar } from './components/Navbar';
 import { ConstellationCanvas } from './components/ConstellationCanvas';
 import { BentoGrid } from './components/BentoGrid';
+import { ExperienceSection } from './components/ExperienceSection';
 import { RingShowcase } from './components/RingShowcase';
 import { MarqueeShowcase } from './components/MarqueeShowcase';
 import { AboutContact } from './components/AboutContact';
@@ -26,6 +27,9 @@ export function App() {
       <main className="relative">
         {/* Section 1: Bento Grid (Overview - Profile Card on Right, About Me on Left, Telemetry & Skills Matrix) */}
         <BentoGrid />
+
+        {/* Section 2: Experience & Engineering Journey */}
+        <ExperienceSection />
 
         {/* Section 3: 3D Ring Project Showcase (Default) with Marquee View Toggle */}
         <div id="marquee-showcase">

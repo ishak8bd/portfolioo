@@ -50,17 +50,23 @@ export const Navbar: React.FC = () => {
         {/* Navigation Items */}
         <nav className="hidden md:flex items-center gap-8 text-xs font-mono tracking-wider uppercase text-zinc-400">
           <button
+            onClick={() => scrollTo('overview')}
+            className="hover:text-white transition-colors cursor-pointer"
+          >
+            Overview
+          </button>
+          <button
+            onClick={() => scrollTo('experience')}
+            className="hover:text-emerald-400 transition-colors cursor-pointer"
+          >
+            Experience
+          </button>
+          <button
             onClick={() => scrollTo('marquee-showcase')}
             className="hover:text-amber-400 transition-colors cursor-pointer flex items-center gap-1.5"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
             <span>Flagships (06)</span>
-          </button>
-          <button
-            onClick={() => scrollTo('overview')}
-            className="hover:text-white transition-colors cursor-pointer"
-          >
-            Overview
           </button>
           <button
             onClick={() => scrollTo('about-contact')}
