@@ -216,11 +216,11 @@ export const Hero: React.FC = () => {
           </button>
 
           <button
-            onClick={() => scrollToSection('bento-grid')}
+            onClick={() => scrollToSection('overview')}
             className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-white border border-white/10 text-sm font-medium transition-all backdrop-blur-md"
           >
             <Terminal className="w-4 h-4 text-sky-400" />
-            <span>Technical Matrix</span>
+            <span>Profile & Overview</span>
           </button>
         </motion.div>
       </div>
@@ -231,7 +231,7 @@ export const Hero: React.FC = () => {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8, duration: 1 }}
         className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 cursor-pointer text-zinc-500 hover:text-zinc-300 transition-colors"
-        onClick={() => scrollToSection('bento-grid')}
+        onClick={() => scrollToSection('overview')}
       >
         <span className="text-[11px] font-mono uppercase tracking-widest">
           Scroll Down

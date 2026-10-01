@@ -57,16 +57,16 @@ export const Navbar: React.FC = () => {
             <span>Flagships (06)</span>
           </button>
           <button
-            onClick={() => scrollTo('bento-grid')}
+            onClick={() => scrollTo('overview')}
             className="hover:text-white transition-colors cursor-pointer"
           >
-            Technical Matrix
+            Overview
           </button>
           <button
             onClick={() => scrollTo('about-contact')}
             className="hover:text-white transition-colors cursor-pointer"
           >
-            Profile & Ethos
+            Contact
           </button>
         </nav>
 
