@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Activity,
   Briefcase,
-  Sparkles,
   Zap,
   BrainCircuit,
   Code2,
@@ -15,15 +14,19 @@ import {
   MapPin,
   Mail,
   User,
+  Pause,
+  Play,
 } from 'lucide-react';
 
 type LensRole = 'ai' | 'swe' | 'data';
 
 export const OverviewHero: React.FC = () => {
   const [activeRole, setActiveRole] = useState<LensRole>('ai');
+  const [isAutoCycling, setIsAutoCycling] = useState<boolean>(true);
 
   // Automatically cycle through AI Engineer, Software Engineer, and Data Scientist
   useEffect(() => {
+    if (!isAutoCycling) return;
     const roles: LensRole[] = ['ai', 'swe', 'data'];
     const timer = setInterval(() => {
       setActiveRole((prev) => {
@@ -32,7 +35,7 @@ export const OverviewHero: React.FC = () => {
       });
     }, 3800);
     return () => clearInterval(timer);
-  }, []);
+  }, [isAutoCycling]);
 
   // 3D Tilt calculation for Profile Picture Card
   const cardRef = useRef<HTMLDivElement>(null);
@@ -130,35 +133,13 @@ export const OverviewHero: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 mb-14 sm:mb-18 items-center">
         {/* LEFT COLUMN: Overview Typography & Interactive Lens (7 cols on lg) */}
         <div className="lg:col-span-7 flex flex-col justify-center text-left">
-          {/* Availability & Motto Banner with Appearance Motion */}
+          {/* Automatically Rotating Dynamic Role Badge & Controls */}
           <motion.div
             initial={{ opacity: 0, y: 18, filter: 'blur(6px)' }}
             whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.05, ease: [0.21, 0.47, 0.32, 0.98] }}
-            className="flex flex-wrap items-center gap-3 mb-6"
-          >
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-mono backdrop-blur-md shadow-sm">
-              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-              <span>OVERVIEW // ISHAK BOUDAOUD</span>
-            </div>
-
-            <div className="flex items-center gap-2 text-xs font-mono text-emerald-400 bg-emerald-950/40 border border-emerald-500/30 px-3 py-1 rounded-full backdrop-blur-md">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
-              </span>
-              <span>Blida, DZ · UTC+1 · Open to Opportunities</span>
-            </div>
-          </motion.div>
-
-          {/* Automatically Rotating Dynamic Role Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: 18, filter: 'blur(6px)' }}
-            whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.15, ease: [0.21, 0.47, 0.32, 0.98] }}
-            className="mb-4 flex items-center gap-2"
+            transition={{ duration: 0.6, delay: 0.1, ease: [0.21, 0.47, 0.32, 0.98] }}
+            className="mb-5 flex flex-wrap items-center gap-2.5"
           >
             <AnimatePresence mode="wait">
               <motion.div
@@ -173,21 +154,42 @@ export const OverviewHero: React.FC = () => {
                 {activeRole === 'swe' && <Code2 className="w-3.5 h-3.5 text-blue-400 animate-pulse" />}
                 {activeRole === 'data' && <Database className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />}
                 <span className="font-semibold tracking-wider uppercase">{currentLens.categoryTag}</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-current animate-ping opacity-75" />
+                <span className={`w-1.5 h-1.5 rounded-full bg-current ${isAutoCycling ? 'animate-ping opacity-75' : 'opacity-40'}`} />
               </motion.div>
             </AnimatePresence>
 
             {/* Subtle cycling progress indicator dots */}
-            <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-white/[0.02] border border-white/5">
+            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white/[0.03] border border-white/10">
               {(['ai', 'swe', 'data'] as const).map((r) => (
-                <span
+                <button
                   key={r}
-                  className={`w-1.5 h-1.5 rounded-full transition-all duration-500 ${
-                    activeRole === r ? 'bg-cyan-400 scale-125' : 'bg-zinc-700'
+                  onClick={() => setActiveRole(r)}
+                  title={`Switch to ${roleDetails[r].title}`}
+                  className={`w-1.5 h-1.5 rounded-full transition-all duration-500 cursor-pointer ${
+                    activeRole === r ? 'bg-cyan-400 scale-125' : 'bg-zinc-600 hover:bg-zinc-400'
                   }`}
                 />
               ))}
             </div>
+
+            {/* Small Pause / Play Auto-cycle Button */}
+            <button
+              onClick={() => setIsAutoCycling((prev) => !prev)}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] hover:border-white/25 text-zinc-400 hover:text-white transition-all cursor-pointer active:scale-95 shadow-sm"
+              title={isAutoCycling ? 'Pause automatic role rotation' : 'Resume automatic role rotation'}
+            >
+              {isAutoCycling ? (
+                <>
+                  <Pause className="w-3 h-3 text-amber-400" />
+                  <span className="text-[10px] tracking-wider uppercase text-zinc-400">Pause</span>
+                </>
+              ) : (
+                <>
+                  <Play className="w-3 h-3 text-emerald-400 fill-emerald-400/20" />
+                  <span className="text-[10px] tracking-wider uppercase text-emerald-400 font-semibold">Play</span>
+                </>
+              )}
+            </button>
           </motion.div>
 
           {/* Dynamic Headline & Focus Pill with Appearance Motion */}
